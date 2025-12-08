@@ -8,9 +8,16 @@ import { cn } from "@/lib/utils";
 interface ShipmentCardProps {
   shipment: Shipment;
   index?: number;
+  packageNumber?: number;
+  totalPackages?: number;
 }
 
-export const ShipmentCard = ({ shipment, index = 0 }: ShipmentCardProps) => {
+export const ShipmentCard = ({ 
+  shipment, 
+  index = 0,
+  packageNumber = 1,
+  totalPackages = 1
+}: ShipmentCardProps) => {
   const isActive = shipment.status !== "delivered" && shipment.status !== "cancelled";
   const itemCount = shipment.items.length;
   const displayItems = shipment.items.slice(0, 3);
@@ -34,10 +41,9 @@ export const ShipmentCard = ({ shipment, index = 0 }: ShipmentCardProps) => {
         {/* Status row */}
         <div className="mb-4 flex items-center justify-between">
           <StatusBadge status={shipment.status} />
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <span className="hidden sm:inline">Shipment</span>
-            <span className="font-medium text-foreground">#{shipment.id}</span>
-          </div>
+          <span className="text-sm font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
+            Package {packageNumber}/{totalPackages}
+          </span>
         </div>
 
         {/* Delivery info */}
