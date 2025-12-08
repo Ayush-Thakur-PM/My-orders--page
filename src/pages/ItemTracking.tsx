@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
@@ -6,11 +7,14 @@ import { ProductList } from "@/components/tracking/ProductList";
 import { OrderDetailsAccordion } from "@/components/tracking/OrderDetailsAccordion";
 import { StickyBottomCTA } from "@/components/ui/sticky-bottom-cta";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { getShipmentByOrderId, getOrderById } from "@/data/mockOrders";
+import { CourierJourneySheet } from "@/components/tracking/CourierJourneySheet";
+import { FAQSection } from "@/components/tracking/FAQSection";
+import { getShipmentByOrderId, getOrderById, mockShipments } from "@/data/mockOrders";
 import { Calendar, Package } from "lucide-react";
 
 const ItemTracking = () => {
   const { orderId, shipmentId } = useParams();
+  const [courierSheetOpen, setCourierSheetOpen] = useState(false);
 
   const shipment = orderId ? getShipmentByOrderId(orderId) : undefined;
   const order = orderId ? getOrderById(orderId) : undefined;
@@ -21,9 +25,14 @@ const ItemTracking = () => {
 
   const isActive = shipment.status !== "delivered" && shipment.status !== "cancelled";
 
+  // Calculate package number (e.g., "Package 1/2")
+  const totalPackages = order.shipments.length;
+  const packageIndex = order.shipments.findIndex(s => s.id === shipment.id) + 1;
+  const packageLabel = `Package ${packageIndex}/${totalPackages}`;
+
   return (
     <div className="min-h-screen bg-background pb-28">
-      <Header title="Track Shipment" showBack />
+      <Header title="Track Package" showBack showBrandTitle />
 
       <main className="container px-4 py-6">
         {/* Hero Status Card */}
@@ -36,8 +45,8 @@ const ItemTracking = () => {
           <div className="border-b border-border/50 p-4">
             <div className="flex items-center justify-between">
               <StatusBadge status={shipment.status} size="lg" />
-              <span className="text-sm text-muted-foreground">
-                #{shipment.id}
+              <span className="text-sm font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
+                {packageLabel}
               </span>
             </div>
           </div>
@@ -105,7 +114,12 @@ const ItemTracking = () => {
             Tracking Updates
           </h2>
           <div className="rounded-2xl bg-card p-4 shadow-card">
-            <TrackingTimeline milestones={shipment.milestones} />
+            <TrackingTimeline 
+              milestones={shipment.milestones}
+              carrier={shipment.carrier}
+              trackingNumber={shipment.trackingNumber}
+              onCarrierClick={() => setCourierSheetOpen(true)}
+            />
           </div>
         </motion.section>
 
@@ -119,7 +133,7 @@ const ItemTracking = () => {
           <div className="mb-4 flex items-center gap-2">
             <Package className="h-5 w-5 text-muted-foreground" />
             <h2 className="text-lg font-semibold text-foreground">
-              Items in this Shipment
+              Items in this Package
             </h2>
             <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
               {shipment.items.length}
@@ -139,12 +153,25 @@ const ItemTracking = () => {
           </h2>
           <OrderDetailsAccordion order={order} shipment={shipment} />
         </motion.section>
+
+        {/* FAQ Section */}
+        <FAQSection />
       </main>
 
       <StickyBottomCTA
         primaryLabel="Contact Support"
         secondaryLabel="Call Us"
       />
+
+      {/* Courier Journey Sheet */}
+      {shipment.carrier && shipment.trackingNumber && (
+        <CourierJourneySheet
+          open={courierSheetOpen}
+          onOpenChange={setCourierSheetOpen}
+          carrier={shipment.carrier}
+          trackingNumber={shipment.trackingNumber}
+        />
+      )}
     </div>
   );
 };
