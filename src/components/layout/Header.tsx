@@ -26,9 +26,9 @@ export const Header = ({
   };
 
   const navItems = [
-    { label: "Orders", path: "/orders", icon: null },
-    { label: "My Profile", path: "/profile", icon: User },
+    { label: "My Orders", path: "/orders", icon: null },
     { label: "Wishlist", path: "/wishlist", icon: Heart },
+    { label: "Profile", path: "/profile", icon: User },
   ];
 
   const isActive = (path: string) => location.pathname === path;

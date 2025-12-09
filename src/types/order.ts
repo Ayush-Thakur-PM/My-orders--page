@@ -1,8 +1,11 @@
 export type OrderStatus = 
-  | "confirmed" 
+  | "placed" 
+  | "on_hold"
+  | "unheld"
   | "packed" 
   | "shipped" 
   | "out_for_delivery" 
+  | "rescheduled"
   | "delivered" 
   | "cancelled";
 
@@ -29,6 +32,7 @@ export interface TrackingMilestone {
   description?: string;
   isComplete: boolean;
   isCurrent: boolean;
+  isOptional?: boolean;
 }
 
 export interface Shipment {
@@ -73,10 +77,5 @@ export interface Order {
     subtotal: number;
     shipping: number;
     discount?: number;
-  };
-  installation?: {
-    scheduled: boolean;
-    date?: string;
-    timeSlot?: string;
   };
 }

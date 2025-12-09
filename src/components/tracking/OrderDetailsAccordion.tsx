@@ -12,7 +12,6 @@ import {
   CreditCard, 
   FileText, 
   RotateCcw, 
-  Calendar, 
   Download,
   XCircle 
 } from "lucide-react";
@@ -103,14 +102,14 @@ export const OrderDetailsAccordion = ({ order, shipment }: OrderDetailsAccordion
           </AccordionContent>
         </AccordionItem>
 
-        {/* Payment Details */}
+        {/* Payments & Invoices */}
         <AccordionItem value="payment" className="rounded-xl border border-border/50 bg-card px-4 shadow-card">
           <AccordionTrigger className="py-4 hover:no-underline">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
               </div>
-              <span className="font-medium">Payment Details</span>
+              <span className="font-medium">Payments & Invoices</span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pb-4">
@@ -166,35 +165,6 @@ export const OrderDetailsAccordion = ({ order, shipment }: OrderDetailsAccordion
             </div>
           </AccordionContent>
         </AccordionItem>
-
-        {/* Installation */}
-        {order.installation?.scheduled && (
-          <AccordionItem value="installation" className="rounded-xl border border-border/50 bg-card px-4 shadow-card">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span className="font-medium">Installation</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4">
-              <div className="ml-11 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Scheduled Date</span>
-                  <span className="font-medium text-foreground">{order.installation.date}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Time Slot</span>
-                  <span className="text-foreground">{order.installation.timeSlot}</span>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Our installation team will contact you 30 minutes before arrival.
-                </p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        )}
 
         {/* Returns & Replacements */}
         <AccordionItem value="returns" className="rounded-xl border border-border/50 bg-card px-4 shadow-card">
