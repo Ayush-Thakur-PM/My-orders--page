@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { TrackingTimeline } from "@/components/tracking/TrackingTimeline";
@@ -9,8 +9,8 @@ import { StickyBottomCTA } from "@/components/ui/sticky-bottom-cta";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CourierJourneySheet } from "@/components/tracking/CourierJourneySheet";
 import { FAQSection } from "@/components/tracking/FAQSection";
-import { getShipmentByOrderId, getOrderById, mockShipments } from "@/data/mockOrders";
-import { Calendar, Package } from "lucide-react";
+import { getShipmentByOrderId, getOrderById } from "@/data/mockOrders";
+import { Calendar, Package, ChevronRight } from "lucide-react";
 
 const ItemTracking = () => {
   const { orderId, shipmentId } = useParams();
@@ -35,6 +35,16 @@ const ItemTracking = () => {
       <Header title="Track Package" showBack showBrandTitle />
 
       <main className="container px-4 py-6">
+        {/* Breadcrumb Navigation */}
+        <nav className="mb-4 flex items-center gap-1 text-sm text-muted-foreground overflow-x-auto">
+          <Link to="/orders" className="hover:text-foreground transition-colors whitespace-nowrap">
+            My Orders
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="whitespace-nowrap">Order {order.orderNumber}</span>
+          <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="text-foreground font-medium whitespace-nowrap">Track Shipment</span>
+        </nav>
         {/* Hero Status Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
