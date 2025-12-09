@@ -6,7 +6,7 @@ export const mockShipments: Shipment[] = [
     orderId: "20551926",
     status: "out_for_delivery",
     currentStep: 3,
-    expectedDelivery: "Today, by 6:00 PM",
+    expectedDelivery: "Today, between 9 am - 8 PM",
     trackingNumber: "DTDC1234567890",
     carrier: "DTDC",
     items: [
