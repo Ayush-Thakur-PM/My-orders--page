@@ -3,9 +3,10 @@ import { OrderItem } from "@/types/order";
 
 interface ProductListProps {
   items: OrderItem[];
+  showSku?: boolean;
 }
 
-export const ProductList = ({ items }: ProductListProps) => {
+export const ProductList = ({ items, showSku = true }: ProductListProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -24,18 +25,27 @@ export const ProductList = ({ items }: ProductListProps) => {
           transition={{ delay: index * 0.1 }}
           className="flex gap-4 rounded-xl bg-card p-3 shadow-card"
         >
-          <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
+          {/* 72px uniform thumbnail */}
+          <div className="h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
             <img
               src={item.image}
               alt={item.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover object-center"
               loading="lazy"
             />
           </div>
           
-          <div className="flex flex-1 flex-col justify-center">
+          <div className="flex flex-1 flex-col justify-center min-w-0">
             <h4 className="font-medium text-foreground line-clamp-1">{item.name}</h4>
-            <p className="mt-0.5 text-sm text-muted-foreground">{item.variant}</p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+              {showSku && item.sku && (
+                <span className="font-mono text-xs">{item.sku}</span>
+              )}
+              <span>{item.variant}</span>
+              {item.configuration && (
+                <span className="text-xs">· {item.configuration}</span>
+              )}
+            </div>
             <div className="mt-1.5 flex items-center justify-between">
               <span className="font-semibold text-foreground">{formatPrice(item.price)}</span>
               {item.quantity > 1 && (

@@ -7,6 +7,7 @@ export type OrderStatus =
   | "out_for_delivery" 
   | "rescheduled"
   | "delivered" 
+  | "return_pickup"
   | "cancelled";
 
 export type ShipmentStatus = 
@@ -16,10 +17,31 @@ export type ShipmentStatus =
   | "delivered" 
   | "cancelled";
 
+export type OrderType = "normal" | "return" | "exchange" | "replacement";
+
+// Metro cities eligible for exchange (simultaneous pickup & delivery)
+export const EXCHANGE_ELIGIBLE_CITIES = [
+  "Bangalore", "Bengaluru",
+  "Hyderabad",
+  "Delhi", "Delhi NCR", "New Delhi",
+  "Mumbai",
+  "Pune",
+  "Kolkata",
+  "Chennai"
+];
+
+export const isExchangeEligible = (city: string): boolean => {
+  return EXCHANGE_ELIGIBLE_CITIES.some(c => 
+    city.toLowerCase().includes(c.toLowerCase())
+  );
+};
+
 export interface OrderItem {
   id: string;
+  sku?: string;
   name: string;
   variant: string;
+  configuration?: string;
   image: string;
   quantity: number;
   price: number;
@@ -61,6 +83,7 @@ export interface Order {
   id: string;
   orderNumber: string;
   orderDate: string;
+  orderType?: OrderType;
   shipments: Shipment[];
   billingAddress: {
     name: string;
