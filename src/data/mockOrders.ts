@@ -9,6 +9,7 @@ export const mockShipments: Shipment[] = [
     expectedDelivery: "Today, 9 am to 8 pm",
     trackingNumber: "DTDC1234567890",
     carrier: "DTDC",
+    actionStatus: "none",
     items: [
       {
         id: "TSCSMS002",
@@ -88,6 +89,7 @@ export const mockShipments: Shipment[] = [
     expectedDelivery: "Dec 10 - Dec 12",
     trackingNumber: "BLUEDART9876543",
     carrier: "Blue Dart",
+    actionStatus: "none",
     items: [
       {
         id: "TSCBED01",
@@ -173,6 +175,7 @@ export const mockShipments: Shipment[] = [
     deliveredDate: "Nov 24, 2024",
     trackingNumber: "DELHIVERY111222",
     carrier: "Delhivery",
+    actionStatus: "returned",
     items: [
       {
         id: "TSCDESK01",
@@ -238,6 +241,7 @@ export const mockShipments: Shipment[] = [
     status: "cancelled",
     currentStep: 0,
     expectedDelivery: "Cancelled",
+    actionStatus: "none",
     items: [
       {
         id: "TSCCHAIR01",
@@ -284,6 +288,7 @@ export const mockShipments: Shipment[] = [
     expectedDelivery: "Dec 12, 2024",
     trackingNumber: "FEDEX8765432",
     carrier: "FedEx",
+    actionStatus: "replacement_in_progress",
     items: [
       {
         id: "TSCSOFA01",
@@ -371,6 +376,7 @@ export const mockShipments: Shipment[] = [
     deliveredDate: "Dec 8, 2024",
     trackingNumber: "DTDC9999888",
     carrier: "DTDC",
+    actionStatus: "exchanged",
     items: [
       {
         id: "TSCMAT02",
@@ -439,6 +445,116 @@ export const mockShipments: Shipment[] = [
         isComplete: true,
         isCurrent: true,
         isOptional: true,
+      },
+    ],
+  },
+  // Return in progress order
+  {
+    id: "SHP007",
+    orderId: "20551940",
+    status: "processing",
+    currentStep: 0,
+    actionStatus: "return_in_progress",
+    expectedDelivery: "Return Pickup: Dec 15, 2024",
+    trackingNumber: "BLUEDART7778889",
+    carrier: "Blue Dart",
+    items: [
+      {
+        id: "TSCPILLOW02",
+        sku: "TSCPILLOW02",
+        name: "SmartGRID Contour Pillow",
+        variant: "Memory Foam",
+        configuration: "Firm",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/1_42041cdc-de2c-4d7c-be95-58d3ef1d838e.webp?v=1754645146",
+        quantity: 1,
+        price: 3499,
+      },
+    ],
+    shippingAddress: {
+      name: "Rahul Sharma",
+      line1: "B-42, Sector 15",
+      city: "Noida",
+      state: "Uttar Pradesh",
+      pincode: "201301",
+      phone: "+91 98278 74262",
+    },
+    milestones: [
+      {
+        status: "placed",
+        label: "Return Requested",
+        timestamp: "Dec 10, 2024",
+        description: "Return request submitted",
+        isComplete: true,
+        isCurrent: true,
+      },
+    ],
+  },
+  // Exchange scheduled order (Mumbai - metro city)
+  {
+    id: "SHP008",
+    orderId: "20551945",
+    status: "in_transit",
+    currentStep: 2,
+    expectedDelivery: "Dec 14, 2024",
+    trackingNumber: "DELHIVERY5556667",
+    carrier: "Delhivery",
+    actionStatus: "exchange_scheduled",
+    items: [
+      {
+        id: "TSCMAT03",
+        sku: "TSCMAT03",
+        name: "SmartGRID Recliner",
+        variant: "Single / Beige",
+        configuration: "Manual",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 35999,
+      },
+    ],
+    shippingAddress: {
+      name: "Sneha Kapoor",
+      line1: "405, Sea View Apartments",
+      line2: "Worli",
+      city: "Mumbai",
+      state: "Maharashtra",
+      pincode: "400018",
+      phone: "+91 98765 43210",
+    },
+    milestones: [
+      {
+        status: "placed",
+        label: "Exchange Initiated",
+        timestamp: "Dec 10, 2024",
+        description: "Exchange order created",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "packed",
+        label: "Packed",
+        timestamp: "Dec 11, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "shipped",
+        label: "Shipped",
+        timestamp: "Dec 12, 2024",
+        description: "Exchange item in transit",
+        isComplete: false,
+        isCurrent: true,
+      },
+      {
+        status: "out_for_delivery",
+        label: "Exchange Delivery",
+        isComplete: false,
+        isCurrent: false,
+      },
+      {
+        status: "delivered",
+        label: "Exchanged",
+        isComplete: false,
+        isCurrent: false,
       },
     ],
   },
