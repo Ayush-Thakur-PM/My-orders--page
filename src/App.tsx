@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PhoneAuth from "./pages/PhoneAuth";
 import OrderListing from "./pages/OrderListing";
 import ItemTracking from "./pages/ItemTracking";
+import Wishlist from "./pages/Wishlist";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,6 +21,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<PhoneAuth />} />
           <Route path="/orders" element={<OrderListing />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/track/:orderId" element={<ItemTracking />} />
           <Route path="/track/:orderId/:shipmentId" element={<ItemTracking />} />
           {/* Legacy routes redirect */}

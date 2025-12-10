@@ -19,6 +19,8 @@ export type ShipmentStatus =
 
 export type OrderType = "normal" | "return" | "exchange" | "replacement";
 
+export type ActionStatus = "none" | "return_requested" | "return_in_progress" | "returned" | "replacement_in_progress" | "replaced" | "exchange_scheduled" | "exchanged";
+
 // Metro cities eligible for exchange (simultaneous pickup & delivery)
 export const EXCHANGE_ELIGIBLE_CITIES = [
   "Bangalore", "Bengaluru",
@@ -67,6 +69,7 @@ export interface Shipment {
   deliveredDate?: string;
   trackingNumber?: string;
   carrier?: string;
+  actionStatus?: ActionStatus;
   shippingAddress: {
     name: string;
     line1: string;
