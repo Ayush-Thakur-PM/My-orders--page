@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Package, Truck, MapPin, Home, ShoppingBag, Pause, Play, RefreshCw } from "lucide-react";
+import { Check, Package, Truck, MapPin, Home, ShoppingBag, Pause, Play, RefreshCw, PackageCheck } from "lucide-react";
 import { TrackingMilestone } from "@/types/order";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,8 @@ const getIcon = (status: string) => {
       return RefreshCw;
     case "delivered":
       return Home;
+    case "return_pickup":
+      return PackageCheck;
     default:
       return ShoppingBag;
   }

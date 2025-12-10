@@ -63,14 +63,14 @@ export const ShipmentCard = ({
           )}
         </div>
 
-        {/* Product thumbnails */}
+        {/* Product thumbnails - 72px uniform tiles */}
         <div className="flex items-center justify-between">
           <div className="flex items-center -space-x-2">
             {displayItems.map((item, idx) => (
               <div
                 key={item.id}
                 className={cn(
-                  "relative h-14 w-14 overflow-hidden rounded-xl border-2 border-card bg-secondary",
+                  "relative h-[72px] w-[72px] overflow-hidden rounded-xl border-2 border-card bg-secondary",
                   "transition-transform group-hover:scale-105",
                   idx > 0 && "shadow-sm"
                 )}
@@ -79,13 +79,13 @@ export const ShipmentCard = ({
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-center"
                   loading="lazy"
                 />
               </div>
             ))}
             {remainingCount > 0 && (
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-xl border-2 border-card bg-secondary shadow-sm">
+              <div className="relative flex h-[72px] w-[72px] items-center justify-center rounded-xl border-2 border-card bg-secondary shadow-sm">
                 <span className="text-sm font-medium text-muted-foreground">+{remainingCount}</span>
               </div>
             )}
