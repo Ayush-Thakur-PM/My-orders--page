@@ -71,6 +71,11 @@ export const ShipmentCard = ({
             </p>
           ) : shipment.status === "cancelled" ? (
             <p className="text-sm text-destructive">Order was cancelled</p>
+          ) : shipment.actionStatus && ["return_requested", "return_in_progress", "exchange_scheduled", "exchanged"].includes(shipment.actionStatus) ? (
+            <p className="text-sm text-muted-foreground">
+              Expected return pickup{" "}
+              <span className="font-semibold text-foreground">{shipment.expectedDelivery}</span>
+            </p>
           ) : (
             <p className="text-sm text-muted-foreground">
               Expected delivery{" "}
