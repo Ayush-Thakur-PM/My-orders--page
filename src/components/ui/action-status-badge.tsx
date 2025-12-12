@@ -48,7 +48,7 @@ export const ActionStatusBadge = ({ status, className }: ActionStatusBadgeProps)
       className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
     },
     exchanged: {
-      label: "Exchange Initiated",
+      label: "Exchange In Progress",
       icon: ArrowLeftRight,
       className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
     },
