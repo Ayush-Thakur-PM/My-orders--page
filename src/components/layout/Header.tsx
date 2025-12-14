@@ -1,4 +1,4 @@
-import { ChevronLeft, Headphones, User, Heart } from "lucide-react";
+import { ChevronLeft, Headphones } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -26,9 +26,9 @@ export const Header = ({
   };
 
   const navItems = [
-    { label: "My Orders", path: "/orders", icon: null },
-    { label: "Wishlist", path: "/wishlist", icon: Heart },
-    { label: "Profile", path: "/profile", icon: User },
+    { label: "Orders", path: "/orders" },
+    { label: "Wishlist", path: "/wishlist" },
+    { label: "My Profile", path: "/profile" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -37,7 +37,7 @@ export const Header = ({
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-50 glass border-b border-border/50"
+      className="sticky top-0 z-50 bg-background border-b border-border/30"
     >
       {/* Brand Title Bar - optional */}
       {showBrandTitle && (
@@ -82,39 +82,51 @@ export const Header = ({
             {title}
           </h1>
         ) : (
-          <nav className="hidden sm:flex items-center gap-1">
+          <nav className="hidden sm:flex items-center">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "relative px-6 py-4 text-base font-medium transition-colors",
                   isActive(item.path)
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {item.label}
+                {isActive(item.path) && (
+                  <motion.div
+                    layoutId="nav-underline"
+                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full"
+                  />
+                )}
               </Link>
             ))}
           </nav>
         )}
 
-        {/* Mobile Navigation Pills */}
+        {/* Mobile Navigation - Full width tabs with underline */}
         {!showBack && (
-          <nav className="flex sm:hidden items-center gap-1">
+          <nav className="flex sm:hidden items-center">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                  "relative px-4 py-3 text-sm font-medium transition-colors",
                   isActive(item.path)
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-secondary"
+                    ? "text-foreground"
+                    : "text-muted-foreground"
                 )}
               >
-                {item.label.split(" ")[0]}
+                {item.label}
+                {isActive(item.path) && (
+                  <motion.div
+                    layoutId="nav-underline-mobile"
+                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full"
+                  />
+                )}
               </Link>
             ))}
           </nav>
