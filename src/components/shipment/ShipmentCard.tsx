@@ -14,6 +14,7 @@ interface ShipmentCardProps {
   packageNumber?: number;
   totalPackages?: number;
   showItemDetails?: boolean;
+  onReturnsClick?: (shipment: Shipment) => void;
 }
 
 export const ShipmentCard = ({ 
@@ -21,7 +22,8 @@ export const ShipmentCard = ({
   index = 0,
   packageNumber = 1,
   totalPackages = 1,
-  showItemDetails = false
+  showItemDetails = false,
+  onReturnsClick,
 }: ShipmentCardProps) => {
   const [isExpanded, setIsExpanded] = useState(showItemDetails);
   const isActive = shipment.status !== "delivered" && shipment.status !== "cancelled";
@@ -147,19 +149,49 @@ export const ShipmentCard = ({
           )}
         </button>
 
-        {/* Action buttons */}
+        {/* Action buttons - Conditional based on status */}
         <div className="flex items-center gap-3 mt-4">
-          <Link
-            to={`/track/${shipment.orderId}/${shipment.id}`}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl",
-              "bg-primary text-primary-foreground text-sm font-medium",
-              "hover:bg-primary/90 transition-colors"
-            )}
-          >
-            Track Package
-            <ChevronRight className="h-4 w-4" />
-          </Link>
+          {/* Show Track Package only when in progress */}
+          {isActive || (shipment.actionStatus && ["return_requested", "return_in_progress", "exchange_scheduled"].includes(shipment.actionStatus)) ? (
+            <Link
+              to={`/track/${shipment.orderId}/${shipment.id}`}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl",
+                "bg-primary text-primary-foreground text-sm font-medium",
+                "hover:bg-primary/90 transition-colors"
+              )}
+            >
+              Track Package
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            /* Show Replace/Return and Order Details for delivered/cancelled */
+            <>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  onReturnsClick?.(shipment);
+                }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl",
+                  "border-2 border-primary text-primary text-sm font-medium",
+                  "hover:bg-primary/5 transition-colors"
+                )}
+              >
+                Replace / Return
+              </button>
+              <Link
+                to={`/track/${shipment.orderId}/${shipment.id}`}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl",
+                  "bg-secondary text-foreground text-sm font-medium",
+                  "hover:bg-secondary/80 transition-colors"
+                )}
+              >
+                Order Details
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Active pulse indicator */}

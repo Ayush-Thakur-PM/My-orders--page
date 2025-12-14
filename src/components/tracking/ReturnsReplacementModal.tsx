@@ -11,8 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { RotateCcw, RefreshCw, ArrowLeftRight } from "lucide-react";
+import { RotateCcw, RefreshCw, ArrowLeftRight, CheckCircle2, Calendar, Truck } from "lucide-react";
 import { OrderItem, isExchangeEligible } from "@/types/order";
+import { motion } from "framer-motion";
+import { format, addDays } from "date-fns";
 
 interface ReturnsReplacementModalProps {
   open: boolean;
@@ -22,6 +24,7 @@ interface ReturnsReplacementModalProps {
 }
 
 type ActionType = "return" | "replacement" | "exchange";
+type ModalStep = "form" | "confirmation";
 
 export const ReturnsReplacementModal = ({
   open,
@@ -29,11 +32,15 @@ export const ReturnsReplacementModal = ({
   items = [],
   shippingCity = "",
 }: ReturnsReplacementModalProps) => {
+  const [step, setStep] = useState<ModalStep>("form");
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
 
   const isExchangeCity = isExchangeEligible(shippingCity);
+  
+  // Generate expected pickup date (3-5 business days from now)
+  const expectedPickupDate = format(addDays(new Date(), 4), "EEE, dd MMM yyyy");
 
   const handleItemToggle = (itemId: string) => {
     setSelectedItems(prev =>
@@ -51,19 +58,29 @@ export const ReturnsReplacementModal = ({
     }
   };
 
-  const handleContinue = () => {
+  const handleSubmit = () => {
     if (selectedAction && selectedItems.length > 0) {
-      // Handle the flow continuation
-      console.log("Action:", selectedAction, "Items:", selectedItems, "Notes:", notes);
-      onOpenChange(false);
+      // Submit the request and show confirmation
+      console.log("Submitted:", selectedAction, "Items:", selectedItems, "Notes:", notes);
+      setStep("confirmation");
     }
   };
 
   const handleClose = () => {
+    setStep("form");
     setSelectedAction(null);
     setSelectedItems([]);
     setNotes("");
     onOpenChange(false);
+  };
+
+  const getActionLabel = () => {
+    switch (selectedAction) {
+      case "return": return "Return";
+      case "replacement": return "Replacement";
+      case "exchange": return "Exchange";
+      default: return "Request";
+    }
   };
 
   const actionOptions = [
@@ -90,7 +107,8 @@ export const ReturnsReplacementModal = ({
     },
   ];
 
-  return (
+  // Form Step
+  const renderForm = () => (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
@@ -198,7 +216,7 @@ export const ReturnsReplacementModal = ({
             </div>
           )}
 
-          {/* Notes */}
+        {/* Notes */}
           {selectedAction && selectedItems.length > 0 && (
             <div className="space-y-2">
               <Label htmlFor="notes" className="text-sm font-medium">
@@ -225,14 +243,124 @@ export const ReturnsReplacementModal = ({
             Cancel
           </Button>
           <Button
-            onClick={handleContinue}
+            onClick={handleSubmit}
             disabled={!selectedAction || selectedItems.length === 0}
             className="flex-1"
           >
-            Continue
+            Submit Request
           </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
+
+  // Confirmation Step
+  const renderConfirmation = () => (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="text-center py-4"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+            className="mx-auto w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4"
+          >
+            <CheckCircle2 className="h-8 w-8 text-success" />
+          </motion.div>
+          
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-xl">
+              {getActionLabel()} Request Submitted
+            </DialogTitle>
+            <DialogDescription>
+              We've received your request and will process it shortly.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-6 space-y-4">
+            {/* Next Steps */}
+            <div className="bg-secondary/50 rounded-xl p-4 text-left space-y-3">
+              <h4 className="font-medium text-sm">What happens next?</h4>
+              <div className="space-y-2">
+                {selectedAction === "return" && (
+                  <>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">1</span>
+                      <span>Our delivery partner will pick up the item(s)</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">2</span>
+                      <span>Quality check upon receiving the item</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">3</span>
+                      <span>Refund processed within 5-7 business days</span>
+                    </div>
+                  </>
+                )}
+                {selectedAction === "replacement" && (
+                  <>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">1</span>
+                      <span>Our delivery partner will pick up the item(s)</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">2</span>
+                      <span>New item will be shipped once pickup is complete</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">3</span>
+                      <span>Track your replacement in My Orders</span>
+                    </div>
+                  </>
+                )}
+                {selectedAction === "exchange" && (
+                  <>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">1</span>
+                      <span>Delivery partner will arrive with your new item</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">2</span>
+                      <span>Hand over the old item during delivery</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium">3</span>
+                      <span>Exchange completed in a single visit!</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Expected Pickup Date */}
+            <div className="flex items-center justify-center gap-3 py-3 px-4 bg-primary/5 rounded-xl">
+              <div className="flex items-center gap-2">
+                {selectedAction === "exchange" ? (
+                  <Truck className="h-5 w-5 text-primary" />
+                ) : (
+                  <Calendar className="h-5 w-5 text-primary" />
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {selectedAction === "exchange" ? "Expected exchange" : "Expected pickup"}
+                </span>
+              </div>
+              <span className="font-semibold text-foreground">{expectedPickupDate}</span>
+            </div>
+          </div>
+
+          <Button onClick={handleClose} className="w-full mt-6">
+            Back to My Orders
+          </Button>
+        </motion.div>
+      </DialogContent>
+    </Dialog>
+  );
+
+  return step === "confirmation" ? renderConfirmation() : renderForm();
 };
