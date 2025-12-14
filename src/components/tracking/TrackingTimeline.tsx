@@ -57,7 +57,7 @@ export const TrackingTimeline = ({
         const isLast = index === visibleMilestones.length - 1;
         
         const showCarrierLink = 
-          (milestone.status === "shipped" || milestone.status === "out_for_delivery") &&
+          milestone.status === "shipped" &&
           carrier &&
           trackingNumber &&
           (isCurrent || isComplete);
