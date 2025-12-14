@@ -167,19 +167,33 @@ export const ShipmentCard = ({
           ) : (
             /* Show Replace/Return and Order Details for delivered/cancelled */
             <>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  onReturnsClick?.(shipment);
-                }}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl",
-                  "border-2 border-primary text-primary text-sm font-medium",
-                  "hover:bg-primary/5 transition-colors"
-                )}
-              >
-                Replace / Return
-              </button>
+              {/* Disable Replace/Return for cancelled or exchanged orders */}
+              {shipment.status === "cancelled" || shipment.actionStatus === "exchanged" ? (
+                <button
+                  disabled
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl",
+                    "border-2 border-muted text-muted-foreground text-sm font-medium",
+                    "cursor-not-allowed opacity-50"
+                  )}
+                >
+                  Replace / Return
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onReturnsClick?.(shipment);
+                  }}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl",
+                    "border-2 border-primary text-primary text-sm font-medium",
+                    "hover:bg-primary/5 transition-colors"
+                  )}
+                >
+                  Replace / Return
+                </button>
+              )}
               <Link
                 to={`/track/${shipment.orderId}/${shipment.id}`}
                 className={cn(
