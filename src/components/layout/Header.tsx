@@ -7,12 +7,14 @@ interface HeaderProps {
   title?: string;
   showBack?: boolean;
   showBrandTitle?: boolean;
+  showNavTabs?: boolean;
 }
 
 export const Header = ({ 
   title = "My Orders", 
   showBack = false,
-  showBrandTitle = false 
+  showBrandTitle = false,
+  showNavTabs = true 
 }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,7 +83,7 @@ export const Header = ({
           <h1 className="absolute left-1/2 -translate-x-1/2 text-base font-semibold text-foreground md:text-lg">
             {title}
           </h1>
-        ) : (
+        ) : showNavTabs ? (
           <nav className="hidden sm:flex items-center">
             {navItems.map((item) => (
               <Link
@@ -104,10 +106,10 @@ export const Header = ({
               </Link>
             ))}
           </nav>
-        )}
+        ) : null}
 
         {/* Mobile Navigation - Full width tabs with underline */}
-        {!showBack && (
+        {!showBack && showNavTabs && (
           <nav className="flex sm:hidden items-center">
             {navItems.map((item) => (
               <Link

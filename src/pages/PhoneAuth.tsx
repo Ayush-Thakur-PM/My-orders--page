@@ -27,7 +27,7 @@ const PhoneAuth = () => {
 
   return (
     <div className="min-h-screen bg-background hex-pattern">
-      <Header title="" />
+      <Header title="" showNavTabs={false} />
       
       <main className="container flex flex-col items-center justify-center px-4 py-12 md:py-20">
         <motion.div
@@ -100,7 +100,7 @@ const PhoneAuth = () => {
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
               ) : (
                 <>
-                  View My Orders
+                  Login
                   <ArrowRight className="h-5 w-5" />
                 </>
               )}
