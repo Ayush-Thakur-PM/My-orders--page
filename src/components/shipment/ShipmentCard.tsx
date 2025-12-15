@@ -230,6 +230,17 @@ export const ShipmentCard = ({
             <span>Simultaneous pickup & delivery available</span>
           </div>
         )}
+
+        {/* Parent Order reference for replacement/exchange orders */}
+        {shipment.parentOrderId && (
+          <Link
+            to={`/track/${shipment.parentOrderId}/${shipment.id}`}
+            className="mt-3 flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary hover:underline"
+          >
+            <Package className="h-4 w-4" />
+            View Parent Order
+          </Link>
+        )}
       </div>
     </motion.div>
   );
