@@ -367,9 +367,11 @@ export const mockShipments: Shipment[] = [
     ],
   },
   // Replacement order with return pickup milestone (exchange in metro city)
+  // This is a CHILD order - it references the parent order 20546974
   {
     id: "SHP006",
     orderId: "20551935",
+    parentOrderId: "20546974", // Reference to parent order
     status: "delivered",
     currentStep: 5,
     expectedDelivery: "Dec 8, 2024",
@@ -490,9 +492,11 @@ export const mockShipments: Shipment[] = [
     ],
   },
   // Exchange scheduled order (Mumbai - metro city)
+  // This is a CHILD order - it references the parent order 20551930
   {
     id: "SHP008",
     orderId: "20551945",
+    parentOrderId: "20551930", // Reference to parent order
     status: "in_transit",
     currentStep: 2,
     expectedDelivery: "Dec 14, 2024",
@@ -665,6 +669,7 @@ export const mockOrders: Order[] = [
     },
   },
   // Replacement/Exchange order example (Bangalore - exchange eligible)
+  // CHILD order - references parent order 20546974
   {
     id: "20551935",
     orderNumber: "#20551935",
@@ -684,6 +689,51 @@ export const mockOrders: Order[] = [
       status: "Paid",
       total: 24999,
       subtotal: 24999,
+      shipping: 0,
+    },
+  },
+  // Return in progress order
+  {
+    id: "20551940",
+    orderNumber: "#20551940",
+    orderDate: "Dec 10, 2024",
+    orderType: "return",
+    shipments: [mockShipments[6]],
+    billingAddress: {
+      name: "Rahul Sharma",
+      line1: "B-42, Sector 15",
+      city: "Noida",
+      state: "Uttar Pradesh",
+      pincode: "201301",
+    },
+    payment: {
+      method: "Credit Card",
+      status: "Refund Pending",
+      total: 3499,
+      subtotal: 3499,
+      shipping: 0,
+    },
+  },
+  // Exchange scheduled order (Mumbai) - CHILD order
+  {
+    id: "20551945",
+    orderNumber: "#20551945",
+    orderDate: "Dec 10, 2024",
+    orderType: "exchange",
+    shipments: [mockShipments[7]],
+    billingAddress: {
+      name: "Sneha Kapoor",
+      line1: "405, Sea View Apartments",
+      line2: "Worli",
+      city: "Mumbai",
+      state: "Maharashtra",
+      pincode: "400018",
+    },
+    payment: {
+      method: "UPI",
+      status: "Paid",
+      total: 35999,
+      subtotal: 35999,
       shipping: 0,
     },
   },
