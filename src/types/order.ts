@@ -70,7 +70,6 @@ export interface Shipment {
   trackingNumber?: string;
   carrier?: string;
   actionStatus?: ActionStatus;
-  parentOrderId?: string; // Reference to parent order for replacement/exchange orders
   shippingAddress: {
     name: string;
     line1: string;
