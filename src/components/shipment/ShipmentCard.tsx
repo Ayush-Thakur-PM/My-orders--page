@@ -202,7 +202,7 @@ export const ShipmentCard = ({
                   "hover:bg-secondary/80 transition-colors"
                 )}
               >
-                Order Details
+                Package Details
               </Link>
             </>
           )}
