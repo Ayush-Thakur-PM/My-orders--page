@@ -1,17 +1,12 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { ShipmentCard } from "@/components/shipment/ShipmentCard";
 import { StickyBottomCTA } from "@/components/ui/sticky-bottom-cta";
-import { ReturnsReplacementModal } from "@/components/tracking/ReturnsReplacementModal";
 import { mockShipments } from "@/data/mockOrders";
 import { Shipment } from "@/types/order";
 import { Package, Clock } from "lucide-react";
 
 const OrderListing = () => {
-  const [returnsModalOpen, setReturnsModalOpen] = useState(false);
-  const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
-
   // Group shipments by status
   const activeShipments = mockShipments.filter(
     (s) => s.status !== "delivered" && s.status !== "cancelled"
@@ -19,11 +14,6 @@ const OrderListing = () => {
   const completedShipments = mockShipments.filter(
     (s) => s.status === "delivered" || s.status === "cancelled"
   );
-
-  const handleReturnsClick = (shipment: Shipment) => {
-    setSelectedShipment(shipment);
-    setReturnsModalOpen(true);
-  };
 
   const ShipmentSection = ({
     title,
@@ -54,7 +44,6 @@ const OrderListing = () => {
             key={shipment.id}
             shipment={shipment}
             index={startIndex + index}
-            onReturnsClick={handleReturnsClick}
           />
         ))}
       </div>
@@ -120,14 +109,6 @@ const OrderListing = () => {
       <StickyBottomCTA
         primaryLabel="Need Help?"
         secondaryLabel="Call Support"
-      />
-
-      {/* Returns Modal */}
-      <ReturnsReplacementModal
-        open={returnsModalOpen}
-        onOpenChange={setReturnsModalOpen}
-        items={selectedShipment?.items}
-        shippingCity={selectedShipment?.shippingAddress.city}
       />
     </div>
   );

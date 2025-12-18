@@ -11,11 +11,9 @@ import {
   MapPin, 
   CreditCard, 
   FileText, 
-  RotateCcw, 
   Download,
   XCircle 
 } from "lucide-react";
-import { ReturnsReplacementModal } from "./ReturnsReplacementModal";
 import { CancellationModal } from "./CancellationModal";
 
 interface OrderDetailsAccordionProps {
@@ -24,7 +22,6 @@ interface OrderDetailsAccordionProps {
 }
 
 export const OrderDetailsAccordion = ({ order, shipment }: OrderDetailsAccordionProps) => {
-  const [returnsModalOpen, setReturnsModalOpen] = useState(false);
   const [cancellationModalOpen, setCancellationModalOpen] = useState(false);
 
   const formatPrice = (price: number) => {
@@ -166,39 +163,6 @@ export const OrderDetailsAccordion = ({ order, shipment }: OrderDetailsAccordion
           </AccordionContent>
         </AccordionItem>
 
-        {/* Returns & Replacements */}
-        <AccordionItem value="returns" className="rounded-xl border border-border/50 bg-card px-4 shadow-card">
-          <AccordionTrigger className="py-4 hover:no-underline">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
-                <RotateCcw className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <span className="font-medium">Returns & Replacements</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="pb-4">
-            <div className="ml-11 space-y-3 text-sm text-muted-foreground">
-              <p>
-                Enjoy our <span className="font-medium text-foreground">100 Nights Trial</span> on
-                mattresses. If you're not satisfied, we'll pick it up for free.
-              </p>
-              <p>
-                For other products, returns are accepted within{" "}
-                <span className="font-medium text-foreground">7 days</span> of delivery.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setReturnsModalOpen(true)}
-                className="mt-2 gap-2"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                Initiate Return or Replacement
-              </Button>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
         {/* Cancel Order - Only show if order can be cancelled */}
         {canCancel && (
           <AccordionItem value="cancel" className="rounded-xl border border-destructive/20 bg-card px-4 shadow-card">
@@ -231,10 +195,6 @@ export const OrderDetailsAccordion = ({ order, shipment }: OrderDetailsAccordion
       </Accordion>
 
       {/* Modals */}
-      <ReturnsReplacementModal
-        open={returnsModalOpen}
-        onOpenChange={setReturnsModalOpen}
-      />
       <CancellationModal
         open={cancellationModalOpen}
         onOpenChange={setCancellationModalOpen}
