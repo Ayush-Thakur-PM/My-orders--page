@@ -1,6 +1,20 @@
-import { Order, Shipment } from "@/types/order";
+import { Order, Shipment, OrderItem, ItemActionStatus, InstallationStatus } from "@/types/order";
+
+// ============================================
+// MULTI-ITEM SHIPMENT MOCK DATA
+// ============================================
+// This file contains comprehensive mock data demonstrating:
+// - Multi-item shipments (3-5 items per shipment)
+// - Item-level post-delivery statuses
+// - Installation flows (furniture requires installation, mattress doesn't)
+// - Return, replacement, and exchange journeys
+// ============================================
 
 export const mockShipments: Shipment[] = [
+  // ============================================
+  // SHIPMENT 1: Active Delivery (Out for Delivery)
+  // 2 items, no post-delivery actions yet
+  // ============================================
   {
     id: "SHP001",
     orderId: "20551926",
@@ -20,6 +34,9 @@ export const mockShipments: Shipment[] = [
         image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
         quantity: 1,
         price: 34999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "none",
       },
       {
         id: "TSCPILLOW01",
@@ -29,6 +46,9 @@ export const mockShipments: Shipment[] = [
         image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/1_42041cdc-de2c-4d7c-be95-58d3ef1d838e.webp?v=1754645146",
         quantity: 2,
         price: 2499,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "none",
       },
     ],
     shippingAddress: {
@@ -81,6 +101,11 @@ export const mockShipments: Shipment[] = [
       },
     ],
   },
+
+  // ============================================
+  // SHIPMENT 2: In Transit with furniture item
+  // 1 item requiring installation
+  // ============================================
   {
     id: "SHP002",
     orderId: "20553743",
@@ -100,6 +125,9 @@ export const mockShipments: Shipment[] = [
         image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
         quantity: 1,
         price: 45999,
+        installationRequired: true,
+        installationStatus: "not_required", // Will change to job_created after delivery
+        actionStatus: "none",
       },
     ],
     shippingAddress: {
@@ -166,6 +194,12 @@ export const mockShipments: Shipment[] = [
       },
     ],
   },
+
+  // ============================================
+  // SHIPMENT 3: DELIVERED - MULTI-ITEM (5 items)
+  // Demonstrates various post-delivery journeys
+  // Location: Delhi NCR (exchange-eligible metro city)
+  // ============================================
   {
     id: "SHP003",
     orderId: "20546974",
@@ -175,24 +209,90 @@ export const mockShipments: Shipment[] = [
     deliveredDate: "Nov 24, 2024",
     trackingNumber: "DELHIVERY111222",
     carrier: "Delhivery",
-    actionStatus: "returned",
+    actionStatus: "none",
     items: [
+      // Item A: Mattress (No Installation) - Return Requested → Approved → Pickup Scheduled
       {
-        id: "TSCDESK01",
-        sku: "TSCDESK01",
-        name: "SmartGRID Adjustable Desk",
-        variant: "Standard / Oak",
-        configuration: "Electric",
+        id: "TSCMAT001",
+        sku: "TSCMAT001",
+        name: "SmartGRID Original Mattress",
+        variant: "Queen Size / 6 inch",
+        configuration: "Medium Soft",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
+        quantity: 1,
+        price: 24999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "return_scheduled",
+        scheduledDate: "Dec 20, 2024",
+        courierPartner: "Delhivery",
+      },
+      // Item B: Bed Frame (Installation Required) - Installation Done, then Replacement Requested
+      {
+        id: "TSCBED002",
+        sku: "TSCBED002",
+        name: "SmartGRID Classic Bed Frame",
+        variant: "King Size / Oak",
+        configuration: "Without Storage",
         image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
         quantity: 1,
-        price: 28999,
+        price: 38999,
+        installationRequired: true,
+        installationStatus: "installation_completed",
+        actionStatus: "replacement_approved",
+        scheduledDate: "Dec 22, 2024",
+        courierPartner: "Blue Dart",
+      },
+      // Item C: Sofa (Installation Required) - Installation Complete, Exchange Requested
+      {
+        id: "TSCSOFA002",
+        sku: "TSCSOFA002",
+        name: "SmartGRID L-Shape Sofa",
+        variant: "5 Seater / Charcoal Grey",
+        configuration: "Left-Hand Facing",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
+        quantity: 1,
+        price: 89999,
+        installationRequired: true,
+        installationStatus: "installation_completed",
+        actionStatus: "exchange_scheduled",
+        scheduledDate: "Dec 21, 2024",
+        courierPartner: "DTDC",
+      },
+      // Item D: Chair (Installation Required) - Technician Assigned, No return action yet
+      {
+        id: "TSCCHAIR002",
+        sku: "TSCCHAIR002",
+        name: "SmartGRID Ergo Office Chair",
+        variant: "Premium / Navy Blue",
+        configuration: "High Back with Headrest",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/1_42041cdc-de2c-4d7c-be95-58d3ef1d838e.webp?v=1754645146",
+        quantity: 1,
+        price: 22999,
+        installationRequired: true,
+        installationStatus: "technician_assigned",
+        actionStatus: "none",
+      },
+      // Item E: Table (Installation Required) - Just delivered, no post-delivery actions
+      {
+        id: "TSCTABLE001",
+        sku: "TSCTABLE001",
+        name: "SmartGRID Standing Desk",
+        variant: "Large / White",
+        configuration: "Electric Height Adjustable",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 32999,
+        installationRequired: true,
+        installationStatus: "job_created",
+        actionStatus: "none",
       },
     ],
     shippingAddress: {
       name: "Rahul Sharma",
       line1: "B-42, Sector 15",
-      city: "Noida",
-      state: "Uttar Pradesh",
+      city: "Delhi NCR",
+      state: "Delhi",
       pincode: "201301",
       phone: "+91 98278 74262",
     },
@@ -235,6 +335,10 @@ export const mockShipments: Shipment[] = [
       },
     ],
   },
+
+  // ============================================
+  // SHIPMENT 4: Cancelled Order
+  // ============================================
   {
     id: "SHP004",
     orderId: "20543687",
@@ -251,6 +355,8 @@ export const mockShipments: Shipment[] = [
         image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/1_42041cdc-de2c-4d7c-be95-58d3ef1d838e.webp?v=1754645146",
         quantity: 1,
         price: 18999,
+        installationRequired: true,
+        actionStatus: "none",
       },
     ],
     shippingAddress: {
@@ -279,43 +385,202 @@ export const mockShipments: Shipment[] = [
       },
     ],
   },
-  // Rescheduled delivery example
+
+  // ============================================
+  // SHIPMENT 5: DELIVERED - MULTI-ITEM (4 items)
+  // Bangalore - Metro city (exchange eligible)
+  // Shows complete post-delivery journeys
+  // ============================================
   {
     id: "SHP005",
     orderId: "20551930",
-    status: "out_for_delivery",
-    currentStep: 3,
-    expectedDelivery: "Dec 12, 2024",
+    status: "delivered",
+    currentStep: 4,
+    expectedDelivery: "Dec 8, 2024",
+    deliveredDate: "Dec 7, 2024",
     trackingNumber: "FEDEX8765432",
     carrier: "FedEx",
-    actionStatus: "replacement_in_progress",
+    actionStatus: "none",
     items: [
+      // Mattress - No install, Return picked up (completed return flow)
       {
-        id: "TSCSOFA01",
-        sku: "TSCSOFA01",
-        name: "SmartGRID Sofa Bed",
-        variant: "3 Seater / Grey",
-        configuration: "With Cup Holders",
+        id: "TSCMAT003",
+        sku: "TSCMAT003",
+        name: "SmartGRID Memory Foam Mattress",
+        variant: "Double Size / 10 inch",
+        configuration: "Extra Firm",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
+        quantity: 1,
+        price: 29999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "return_picked_up",
+      },
+      // Sofa Bed - Installation completed, Exchange completed
+      {
+        id: "TSCSOFA003",
+        sku: "TSCSOFA003",
+        name: "SmartGRID Convertible Sofa Bed",
+        variant: "3 Seater / Beige",
+        configuration: "With Storage",
         image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
         quantity: 1,
         price: 65999,
+        installationRequired: true,
+        installationStatus: "installation_completed",
+        actionStatus: "exchange_picked_up",
+      },
+      // Wardrobe - Installation in progress (Technician assigned)
+      {
+        id: "TSCWARD001",
+        sku: "TSCWARD001",
+        name: "SmartGRID Sliding Door Wardrobe",
+        variant: "6 Door / Walnut",
+        configuration: "With Mirror",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 75999,
+        installationRequired: true,
+        installationStatus: "technician_assigned",
+        actionStatus: "none",
+      },
+      // Pillow - Simple delivered, no action
+      {
+        id: "TSCPILLOW003",
+        sku: "TSCPILLOW003",
+        name: "SmartGRID Cervical Pillow",
+        variant: "Memory Foam",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/1_42041cdc-de2c-4d7c-be95-58d3ef1d838e.webp?v=1754645146",
+        quantity: 1,
+        price: 3999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "none",
       },
     ],
     shippingAddress: {
       name: "Priya Singh",
-      line1: "A-101, Green Park",
-      line2: "Near Metro Station",
-      city: "Delhi",
-      state: "Delhi",
-      pincode: "110016",
+      line1: "A-101, HSR Layout",
+      line2: "Sector 6",
+      city: "Bangalore",
+      state: "Karnataka",
+      pincode: "560102",
       phone: "+91 99887 76655",
     },
     milestones: [
       {
         status: "placed",
         label: "Order Placed",
-        timestamp: "Dec 5, 2024",
+        timestamp: "Dec 1, 2024",
         description: "Your order has been placed successfully",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "packed",
+        label: "Packed",
+        timestamp: "Dec 2, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "shipped",
+        label: "Shipped",
+        timestamp: "Dec 3, 2024",
+        description: "Package picked up by FedEx",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "out_for_delivery",
+        label: "Out for Delivery",
+        timestamp: "Dec 7, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "delivered",
+        label: "Delivered",
+        timestamp: "Dec 7, 2024",
+        description: "Delivered successfully",
+        isComplete: true,
+        isCurrent: true,
+      },
+    ],
+  },
+
+  // ============================================
+  // SHIPMENT 6: DELIVERED - MULTI-ITEM (3 items)
+  // Mumbai - Metro city (exchange eligible)
+  // Shows mixed installation + replacement flows
+  // ============================================
+  {
+    id: "SHP006",
+    orderId: "20551935",
+    status: "delivered",
+    currentStep: 4,
+    expectedDelivery: "Dec 10, 2024",
+    deliveredDate: "Dec 10, 2024",
+    trackingNumber: "DTDC9999888",
+    carrier: "DTDC",
+    actionStatus: "none",
+    items: [
+      // Dining Table - Installation complete, Replacement requested
+      {
+        id: "TSCTABLE002",
+        sku: "TSCTABLE002",
+        name: "SmartGRID 6-Seater Dining Table",
+        variant: "Glass Top / Chrome Legs",
+        configuration: "With Extension Leaf",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 45999,
+        installationRequired: true,
+        installationStatus: "installation_completed",
+        actionStatus: "replacement_requested",
+      },
+      // TV Unit - Job created (awaiting technician)
+      {
+        id: "TSCTVUNIT001",
+        sku: "TSCTVUNIT001",
+        name: "SmartGRID Floating TV Unit",
+        variant: "65 inch / Matte Black",
+        configuration: "With LED Backlight",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 28999,
+        installationRequired: true,
+        installationStatus: "job_created",
+        actionStatus: "none",
+      },
+      // Mattress Protector - No installation, delivered successfully
+      {
+        id: "TSCPROTECT001",
+        sku: "TSCPROTECT001",
+        name: "SmartGRID Waterproof Mattress Protector",
+        variant: "King Size",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
+        quantity: 2,
+        price: 1999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "none",
+      },
+    ],
+    shippingAddress: {
+      name: "Amit Patel",
+      line1: "405, Sea View Apartments",
+      line2: "Worli",
+      city: "Mumbai",
+      state: "Maharashtra",
+      pincode: "400018",
+      phone: "+91 99001 22334",
+    },
+    milestones: [
+      {
+        status: "placed",
+        label: "Order Placed",
+        timestamp: "Dec 5, 2024",
         isComplete: true,
         isCurrent: false,
       },
@@ -330,94 +595,6 @@ export const mockShipments: Shipment[] = [
         status: "shipped",
         label: "Shipped",
         timestamp: "Dec 7, 2024",
-        description: "Package picked up by FedEx",
-        isComplete: true,
-        isCurrent: false,
-      },
-      {
-        status: "out_for_delivery",
-        label: "Out for Delivery",
-        timestamp: "Dec 9, 2024",
-        description: "First delivery attempt",
-        isComplete: true,
-        isCurrent: false,
-      },
-      {
-        status: "rescheduled",
-        label: "Delivery Rescheduled",
-        timestamp: "Dec 9, 2024",
-        description: "Customer requested reschedule to Dec 12",
-        isComplete: true,
-        isCurrent: false,
-        isOptional: true,
-      },
-      {
-        status: "out_for_delivery",
-        label: "Out for Delivery",
-        description: "Your package is with the delivery executive",
-        isComplete: false,
-        isCurrent: true,
-      },
-      {
-        status: "delivered",
-        label: "Delivered",
-        isComplete: false,
-        isCurrent: false,
-      },
-    ],
-  },
-  // Replacement order with return pickup milestone (exchange in metro city)
-  {
-    id: "SHP006",
-    orderId: "20551935",
-    status: "delivered",
-    currentStep: 5,
-    expectedDelivery: "Dec 8, 2024",
-    deliveredDate: "Dec 8, 2024",
-    trackingNumber: "DTDC9999888",
-    carrier: "DTDC",
-    actionStatus: "exchanged",
-    items: [
-      {
-        id: "TSCMAT02",
-        sku: "TSCMAT02",
-        name: "SmartGRID Original Mattress",
-        variant: "Queen Size / 6 inch",
-        configuration: "Soft",
-        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
-        quantity: 1,
-        price: 24999,
-      },
-    ],
-    shippingAddress: {
-      name: "Amit Patel",
-      line1: "12, HSR Layout",
-      line2: "Sector 2",
-      city: "Bangalore",
-      state: "Karnataka",
-      pincode: "560102",
-      phone: "+91 99001 22334",
-    },
-    milestones: [
-      {
-        status: "placed",
-        label: "Order Placed",
-        timestamp: "Dec 3, 2024",
-        description: "Replacement order created",
-        isComplete: true,
-        isCurrent: false,
-      },
-      {
-        status: "packed",
-        label: "Packed",
-        timestamp: "Dec 4, 2024",
-        isComplete: true,
-        isCurrent: false,
-      },
-      {
-        status: "shipped",
-        label: "Shipped",
-        timestamp: "Dec 5, 2024",
         description: "Package picked up by DTDC",
         isComplete: true,
         isCurrent: false,
@@ -425,141 +602,257 @@ export const mockShipments: Shipment[] = [
       {
         status: "out_for_delivery",
         label: "Out for Delivery",
-        timestamp: "Dec 8, 2024",
+        timestamp: "Dec 10, 2024",
         isComplete: true,
         isCurrent: false,
       },
       {
         status: "delivered",
         label: "Delivered",
-        timestamp: "Dec 8, 2024",
-        description: "Replacement delivered successfully",
-        isComplete: true,
-        isCurrent: false,
-      },
-      {
-        status: "return_pickup",
-        label: "Return Picked Up",
-        timestamp: "Dec 8, 2024",
-        description: "Original item picked up during delivery",
+        timestamp: "Dec 10, 2024",
+        description: "Delivered - Signed by Amit",
         isComplete: true,
         isCurrent: true,
-        isOptional: true,
       },
     ],
   },
-  // Return in progress order
+
+  // ============================================
+  // SHIPMENT 7: DELIVERED - MULTI-ITEM (4 items)
+  // Chennai - Metro city (exchange eligible)
+  // Shows various installation stages + actions
+  // ============================================
   {
     id: "SHP007",
     orderId: "20551940",
-    status: "processing",
-    currentStep: 0,
-    actionStatus: "return_in_progress",
-    expectedDelivery: "Return Pickup: Dec 15, 2024",
+    status: "delivered",
+    currentStep: 4,
+    expectedDelivery: "Dec 12, 2024",
+    deliveredDate: "Dec 11, 2024",
     trackingNumber: "BLUEDART7778889",
     carrier: "Blue Dart",
+    actionStatus: "none",
     items: [
+      // Bed Frame - Installation completed, Replacement picked up (full cycle)
       {
-        id: "TSCPILLOW02",
-        sku: "TSCPILLOW02",
-        name: "SmartGRID Contour Pillow",
-        variant: "Memory Foam",
-        configuration: "Firm",
-        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/1_42041cdc-de2c-4d7c-be95-58d3ef1d838e.webp?v=1754645146",
-        quantity: 1,
-        price: 3499,
-      },
-    ],
-    shippingAddress: {
-      name: "Rahul Sharma",
-      line1: "B-42, Sector 15",
-      city: "Noida",
-      state: "Uttar Pradesh",
-      pincode: "201301",
-      phone: "+91 98278 74262",
-    },
-    milestones: [
-      {
-        status: "placed",
-        label: "Return Requested",
-        timestamp: "Dec 10, 2024",
-        description: "Return request submitted",
-        isComplete: true,
-        isCurrent: true,
-      },
-    ],
-  },
-  // Exchange scheduled order (Mumbai - metro city)
-  {
-    id: "SHP008",
-    orderId: "20551945",
-    status: "in_transit",
-    currentStep: 2,
-    expectedDelivery: "Dec 14, 2024",
-    trackingNumber: "DELHIVERY5556667",
-    carrier: "Delhivery",
-    actionStatus: "exchange_scheduled",
-    items: [
-      {
-        id: "TSCMAT03",
-        sku: "TSCMAT03",
-        name: "SmartGRID Recliner",
-        variant: "Single / Beige",
-        configuration: "Manual",
+        id: "TSCBED003",
+        sku: "TSCBED003",
+        name: "SmartGRID Platform Bed",
+        variant: "Queen Size / Teak",
+        configuration: "Low Profile",
         image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
         quantity: 1,
         price: 35999,
+        installationRequired: true,
+        installationStatus: "installation_completed",
+        actionStatus: "replacement_picked_up",
+      },
+      // Side Table - Installation completed
+      {
+        id: "TSCSIDETBL001",
+        sku: "TSCSIDETBL001",
+        name: "SmartGRID Bedside Table",
+        variant: "Set of 2 / Walnut",
+        configuration: "With Drawer",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 12999,
+        installationRequired: true,
+        installationStatus: "installation_completed",
+        actionStatus: "none",
+      },
+      // Mattress - No install, Exchange requested
+      {
+        id: "TSCMAT004",
+        sku: "TSCMAT004",
+        name: "SmartGRID Latex Mattress",
+        variant: "Queen Size / 8 inch",
+        configuration: "Natural Latex",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
+        quantity: 1,
+        price: 42999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "exchange_approved",
+        scheduledDate: "Dec 18, 2024",
+        courierPartner: "Delhivery",
+      },
+      // Pillow Set - Just delivered, no action
+      {
+        id: "TSCPILLOWSET001",
+        sku: "TSCPILLOWSET001",
+        name: "SmartGRID Pillow Set",
+        variant: "Pack of 4",
+        configuration: "Ultra Soft",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/1_42041cdc-de2c-4d7c-be95-58d3ef1d838e.webp?v=1754645146",
+        quantity: 1,
+        price: 7999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "none",
       },
     ],
     shippingAddress: {
       name: "Sneha Kapoor",
-      line1: "405, Sea View Apartments",
-      line2: "Worli",
-      city: "Mumbai",
-      state: "Maharashtra",
-      pincode: "400018",
+      line1: "12, Anna Nagar",
+      line2: "East Block",
+      city: "Chennai",
+      state: "Tamil Nadu",
+      pincode: "600040",
       phone: "+91 98765 43210",
     },
     milestones: [
       {
         status: "placed",
-        label: "Exchange Initiated",
-        timestamp: "Dec 10, 2024",
-        description: "Exchange order created",
+        label: "Order Placed",
+        timestamp: "Dec 6, 2024",
         isComplete: true,
         isCurrent: false,
       },
       {
         status: "packed",
         label: "Packed",
-        timestamp: "Dec 11, 2024",
+        timestamp: "Dec 7, 2024",
         isComplete: true,
         isCurrent: false,
       },
       {
         status: "shipped",
         label: "Shipped",
-        timestamp: "Dec 12, 2024",
-        description: "Exchange item in transit",
-        isComplete: false,
-        isCurrent: true,
+        timestamp: "Dec 8, 2024",
+        description: "Package picked up by Blue Dart",
+        isComplete: true,
+        isCurrent: false,
       },
       {
         status: "out_for_delivery",
-        label: "Exchange Delivery",
-        isComplete: false,
+        label: "Out for Delivery",
+        timestamp: "Dec 11, 2024",
+        isComplete: true,
         isCurrent: false,
       },
       {
         status: "delivered",
-        label: "Exchanged",
-        isComplete: false,
+        label: "Delivered",
+        timestamp: "Dec 11, 2024",
+        description: "Delivered successfully",
+        isComplete: true,
+        isCurrent: true,
+      },
+    ],
+  },
+
+  // ============================================
+  // SHIPMENT 8: DELIVERED - Non-metro city
+  // Jaipur - NOT exchange eligible (only return/replacement)
+  // ============================================
+  {
+    id: "SHP008",
+    orderId: "20551945",
+    status: "delivered",
+    currentStep: 4,
+    expectedDelivery: "Dec 14, 2024",
+    deliveredDate: "Dec 13, 2024",
+    trackingNumber: "DELHIVERY5556667",
+    carrier: "Delhivery",
+    actionStatus: "none",
+    items: [
+      // Recliner - Installation pending (job created)
+      {
+        id: "TSCRECL001",
+        sku: "TSCRECL001",
+        name: "SmartGRID Power Recliner",
+        variant: "Single / Tan Brown",
+        configuration: "Electric with USB",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 55999,
+        installationRequired: true,
+        installationStatus: "job_created",
+        actionStatus: "none",
+      },
+      // Coffee Table - Installation complete
+      {
+        id: "TSCCOFTBL001",
+        sku: "TSCCOFTBL001",
+        name: "SmartGRID Round Coffee Table",
+        variant: "Marble Top / Gold Base",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/01_2.webp?v=1754644948",
+        quantity: 1,
+        price: 18999,
+        installationRequired: true,
+        installationStatus: "installation_completed",
+        actionStatus: "none",
+      },
+      // Comforter - No install, return requested
+      {
+        id: "TSCCOMF001",
+        sku: "TSCCOMF001",
+        name: "SmartGRID All Season Comforter",
+        variant: "King Size / White",
+        configuration: "Microfiber",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
+        quantity: 1,
+        price: 8999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "return_requested",
+      },
+    ],
+    shippingAddress: {
+      name: "Rajesh Kumar",
+      line1: "45, Malviya Nagar",
+      line2: "Near Central Park",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302017",
+      phone: "+91 94567 89012",
+    },
+    milestones: [
+      {
+        status: "placed",
+        label: "Order Placed",
+        timestamp: "Dec 8, 2024",
+        isComplete: true,
         isCurrent: false,
+      },
+      {
+        status: "packed",
+        label: "Packed",
+        timestamp: "Dec 9, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "shipped",
+        label: "Shipped",
+        timestamp: "Dec 10, 2024",
+        description: "Package dispatched from Jaipur Hub",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "out_for_delivery",
+        label: "Out for Delivery",
+        timestamp: "Dec 13, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "delivered",
+        label: "Delivered",
+        timestamp: "Dec 13, 2024",
+        description: "Delivered - Signed by Rajesh",
+        isComplete: true,
+        isCurrent: true,
       },
     ],
   },
 ];
 
+// ============================================
+// ORDERS DATA
+// ============================================
 export const mockOrders: Order[] = [
   {
     id: "20551926",
@@ -603,6 +896,7 @@ export const mockOrders: Order[] = [
       shipping: 0,
     },
   },
+  // Multi-item delivered order with various post-delivery states (Delhi NCR)
   {
     id: "20546974",
     orderNumber: "#20546974",
@@ -611,18 +905,19 @@ export const mockOrders: Order[] = [
     billingAddress: {
       name: "Rahul Sharma",
       line1: "B-42, Sector 15",
-      city: "Noida",
-      state: "Uttar Pradesh",
+      city: "Delhi NCR",
+      state: "Delhi",
       pincode: "201301",
     },
     payment: {
       method: "Net Banking",
       status: "Paid",
-      total: 28999,
-      subtotal: 28999,
+      total: 209995,
+      subtotal: 209995,
       shipping: 0,
     },
   },
+  // Cancelled order
   {
     id: "20543687",
     orderNumber: "#20543687",
@@ -643,52 +938,99 @@ export const mockOrders: Order[] = [
       shipping: 0,
     },
   },
+  // Multi-item Bangalore order
   {
     id: "20551930",
     orderNumber: "#20551930",
-    orderDate: "Dec 5, 2024",
+    orderDate: "Dec 1, 2024",
     shipments: [mockShipments[4]],
     billingAddress: {
       name: "Priya Singh",
-      line1: "A-101, Green Park",
-      line2: "Near Metro Station",
-      city: "Delhi",
-      state: "Delhi",
-      pincode: "110016",
-    },
-    payment: {
-      method: "EMI (HDFC)",
-      status: "Paid",
-      total: 65999,
-      subtotal: 65999,
-      shipping: 0,
-    },
-  },
-  // Replacement/Exchange order example (Bangalore - exchange eligible)
-  {
-    id: "20551935",
-    orderNumber: "#20551935",
-    orderDate: "Dec 3, 2024",
-    orderType: "exchange",
-    shipments: [mockShipments[5]],
-    billingAddress: {
-      name: "Amit Patel",
-      line1: "12, HSR Layout",
-      line2: "Sector 2",
+      line1: "A-101, HSR Layout",
+      line2: "Sector 6",
       city: "Bangalore",
       state: "Karnataka",
       pincode: "560102",
     },
     payment: {
+      method: "EMI (HDFC)",
+      status: "Paid",
+      total: 175996,
+      subtotal: 175996,
+      shipping: 0,
+    },
+  },
+  // Multi-item Mumbai order
+  {
+    id: "20551935",
+    orderNumber: "#20551935",
+    orderDate: "Dec 5, 2024",
+    shipments: [mockShipments[5]],
+    billingAddress: {
+      name: "Amit Patel",
+      line1: "405, Sea View Apartments",
+      line2: "Worli",
+      city: "Mumbai",
+      state: "Maharashtra",
+      pincode: "400018",
+    },
+    payment: {
       method: "Credit Card (ICICI ****7890)",
       status: "Paid",
-      total: 24999,
-      subtotal: 24999,
+      total: 76997,
+      subtotal: 76997,
+      shipping: 0,
+    },
+  },
+  // Multi-item Chennai order
+  {
+    id: "20551940",
+    orderNumber: "#20551940",
+    orderDate: "Dec 6, 2024",
+    shipments: [mockShipments[6]],
+    billingAddress: {
+      name: "Sneha Kapoor",
+      line1: "12, Anna Nagar",
+      line2: "East Block",
+      city: "Chennai",
+      state: "Tamil Nadu",
+      pincode: "600040",
+    },
+    payment: {
+      method: "Debit Card (SBI ****5678)",
+      status: "Paid",
+      total: 99996,
+      subtotal: 99996,
+      shipping: 0,
+    },
+  },
+  // Multi-item Jaipur order (non-metro, no exchange)
+  {
+    id: "20551945",
+    orderNumber: "#20551945",
+    orderDate: "Dec 8, 2024",
+    shipments: [mockShipments[7]],
+    billingAddress: {
+      name: "Rajesh Kumar",
+      line1: "45, Malviya Nagar",
+      line2: "Near Central Park",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302017",
+    },
+    payment: {
+      method: "UPI (Google Pay)",
+      status: "Paid",
+      total: 83997,
+      subtotal: 83997,
       shipping: 0,
     },
   },
 ];
 
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
 export const getShipmentById = (id: string): Shipment | undefined => {
   return mockShipments.find((s) => s.id === id);
 };

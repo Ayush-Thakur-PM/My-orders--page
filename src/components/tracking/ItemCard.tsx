@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { OrderItem, ItemActionStatus, ReturnReason, isExchangeEligible } from "@/types/order";
-import { ItemActionForm } from "./ItemActionForm";
+import { motion } from "framer-motion";
+import { OrderItem, ItemActionStatus, InstallationStatus, ReturnReason, isExchangeEligible } from "@/types/order";
+import { ItemActionModal } from "./ItemActionModal";
 import { PostDeliveryJourneySheet } from "./PostDeliveryJourneySheet";
 import { RotateCcw, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,8 @@ interface ItemCardProps {
   onActionSubmit?: (item: OrderItem, action: string, reason: ReturnReason, notes: string) => void;
 }
 
-const getStatusBadge = (status: ItemActionStatus | undefined) => {
+// Get status badge for action status
+const getActionStatusBadge = (status: ItemActionStatus | undefined) => {
   if (!status || status === "none") return null;
 
   const statusConfig: Record<string, { label: string; className: string }> = {
@@ -36,7 +37,28 @@ const getStatusBadge = (status: ItemActionStatus | undefined) => {
   if (!config) return null;
 
   return (
-    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", config.className)}>
+    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap", config.className)}>
+      {config.label}
+    </span>
+  );
+};
+
+// Get status badge for installation status
+const getInstallationStatusBadge = (status: InstallationStatus | undefined, installationRequired: boolean | undefined) => {
+  // Don't show badge if installation is not required
+  if (!installationRequired || !status || status === "not_required") return null;
+
+  const statusConfig: Record<string, { label: string; className: string }> = {
+    job_created: { label: "Installation Pending", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300" },
+    technician_assigned: { label: "Technician Assigned", className: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300" },
+    installation_completed: { label: "Installation Complete", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" },
+  };
+
+  const config = statusConfig[status];
+  if (!config) return null;
+
+  return (
+    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap", config.className)}>
       {config.label}
     </span>
   );
@@ -49,7 +71,7 @@ export const ItemCard = ({
   shippingCity,
   onActionSubmit 
 }: ItemCardProps) => {
-  const [showActionForm, setShowActionForm] = useState(false);
+  const [showActionModal, setShowActionModal] = useState(false);
   const [showJourneySheet, setShowJourneySheet] = useState(false);
 
   const formatPrice = (price: number) => {
@@ -61,12 +83,19 @@ export const ItemCard = ({
   };
 
   const hasActiveAction = item.actionStatus && item.actionStatus !== "none";
+  const hasInstallationInProgress = item.installationRequired && 
+    item.installationStatus && 
+    item.installationStatus !== "not_required" && 
+    item.installationStatus !== "installation_completed";
   const canInitiateAction = isDelivered && !hasActiveAction;
 
   const handleActionSubmit = (item: OrderItem, action: string, reason: ReturnReason, notes: string) => {
     onActionSubmit?.(item, action, reason, notes);
-    setShowActionForm(false);
+    setShowActionModal(false);
   };
+
+  // Check if item has any post-delivery journey to show
+  const hasPostDeliveryJourney = hasActiveAction || item.installationRequired;
 
   return (
     <>
@@ -88,10 +117,7 @@ export const ItemCard = ({
           </div>
           
           <div className="flex flex-1 flex-col justify-center min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <h4 className="font-medium text-foreground line-clamp-1">{item.name}</h4>
-              {getStatusBadge(item.actionStatus)}
-            </div>
+            <h4 className="font-medium text-foreground line-clamp-1">{item.name}</h4>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
               {item.sku && (
                 <span className="font-mono text-xs">{item.sku}</span>
@@ -110,12 +136,20 @@ export const ItemCard = ({
           </div>
         </div>
 
+        {/* Status Badges - Always visible for delivered items */}
+        {isDelivered && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {getInstallationStatusBadge(item.installationStatus, item.installationRequired)}
+            {getActionStatusBadge(item.actionStatus)}
+          </div>
+        )}
+
         {/* Post-delivery actions */}
         {isDelivered && (
           <div className="mt-3 pt-3 border-t border-border/50">
             <div className="flex items-center gap-2">
               {/* View Journey Button (if has active action or installation) */}
-              {(hasActiveAction || item.installationRequired) && (
+              {hasPostDeliveryJourney && (
                 <button
                   onClick={() => setShowJourneySheet(true)}
                   className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-secondary/80 transition-colors"
@@ -125,16 +159,11 @@ export const ItemCard = ({
                 </button>
               )}
 
-              {/* Replace/Return Button */}
+              {/* Replace/Return Button - Opens Modal */}
               {canInitiateAction && (
                 <button
-                  onClick={() => setShowActionForm(!showActionForm)}
-                  className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors",
-                    showActionForm 
-                      ? "bg-primary text-primary-foreground"
-                      : "border border-primary text-primary hover:bg-primary/5"
-                  )}
+                  onClick={() => setShowActionModal(true)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors border border-primary text-primary hover:bg-primary/5"
                 >
                   <RotateCcw className="h-4 w-4" />
                   Replace / Return
@@ -143,19 +172,16 @@ export const ItemCard = ({
             </div>
           </div>
         )}
-
-        {/* Inline Action Form */}
-        <AnimatePresence>
-          {showActionForm && (
-            <ItemActionForm
-              item={item}
-              shippingCity={shippingCity}
-              onSubmit={handleActionSubmit}
-              onCancel={() => setShowActionForm(false)}
-            />
-          )}
-        </AnimatePresence>
       </motion.div>
+
+      {/* Replace/Return Modal */}
+      <ItemActionModal
+        open={showActionModal}
+        onOpenChange={setShowActionModal}
+        item={item}
+        shippingCity={shippingCity}
+        onSubmit={handleActionSubmit}
+      />
 
       {/* Post-Delivery Journey Sheet */}
       <PostDeliveryJourneySheet

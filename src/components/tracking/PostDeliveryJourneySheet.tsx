@@ -10,7 +10,8 @@ import {
   FileText, 
   ThumbsUp, 
   Calendar, 
-  Truck 
+  Truck,
+  Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,75 +49,87 @@ const getJourneySteps = (item: OrderItem): JourneyStep[] => {
 
   // Installation flow (if required)
   if (hasInstallation) {
+    const jobCreatedComplete = ["job_created", "technician_assigned", "installation_completed"].includes(installationStatus);
+    const techAssignedComplete = ["technician_assigned", "installation_completed"].includes(installationStatus);
+    const installComplete = installationStatus === "installation_completed";
+
     const installationSteps: JourneyStep[] = [
       {
         id: "job_created",
         label: "Job Created",
-        description: "Installation request submitted",
+        description: "Installation request submitted to our team",
         icon: FileText,
-        isComplete: ["job_created", "technician_assigned", "installation_completed"].includes(installationStatus),
-        isCurrent: installationStatus === "job_created",
+        isComplete: jobCreatedComplete,
+        isCurrent: installationStatus === "job_created" && !jobCreatedComplete,
       },
       {
         id: "technician_assigned",
         label: "Technician Assigned",
-        description: "A technician will contact you",
+        description: "A technician will contact you to schedule the installation",
         icon: UserCheck,
-        isComplete: ["technician_assigned", "installation_completed"].includes(installationStatus),
+        isComplete: techAssignedComplete,
         isCurrent: installationStatus === "technician_assigned",
       },
       {
         id: "installation_completed",
         label: "Installation Completed",
-        description: "Setup complete",
+        description: "Product has been assembled and set up",
         icon: Wrench,
-        isComplete: installationStatus === "installation_completed",
+        isComplete: installComplete,
         isCurrent: false,
       },
     ];
     steps.push(...installationSteps);
   }
 
-  // Return/Replacement flow (if initiated)
+  // Return/Replacement/Exchange flow (if initiated)
   if (actionStatus !== "none") {
     const isReturn = actionStatus.includes("return");
     const isReplacement = actionStatus.includes("replacement");
     const isExchange = actionStatus.includes("exchange");
     const actionLabel = isReturn ? "Return" : isReplacement ? "Replacement" : "Exchange";
 
+    const requestedComplete = true; // If action exists, request was submitted
+    const approvedComplete = actionStatus.includes("approved") || actionStatus.includes("scheduled") || actionStatus.includes("picked_up");
+    const scheduledComplete = actionStatus.includes("scheduled") || actionStatus.includes("picked_up");
+    const pickedUpComplete = actionStatus.includes("picked_up");
+
     const actionSteps: JourneyStep[] = [
       {
         id: "request_submitted",
         label: "Request Submitted",
-        description: `${actionLabel} request received`,
+        description: `${actionLabel} request received by our team`,
         icon: FileText,
-        isComplete: true,
-        isCurrent: actionStatus.includes("requested"),
+        isComplete: requestedComplete,
+        isCurrent: actionStatus.includes("requested") && !approvedComplete,
       },
       {
         id: "request_approved",
         label: "Request Approved",
-        description: "Your request has been approved",
+        description: "Your request has been reviewed and approved",
         icon: ThumbsUp,
-        isComplete: actionStatus.includes("approved") || actionStatus.includes("scheduled") || actionStatus.includes("picked_up"),
-        isCurrent: actionStatus.includes("approved") && !actionStatus.includes("scheduled"),
+        isComplete: approvedComplete,
+        isCurrent: actionStatus.includes("approved") && !scheduledComplete,
       },
       {
         id: "pickup_scheduled",
         label: `${actionLabel} Scheduled`,
         description: item.scheduledDate 
-          ? `Scheduled for ${item.scheduledDate}${item.courierPartner ? `, partner: ${item.courierPartner}` : ""}`
-          : "Pickup date will be confirmed",
+          ? `${isExchange ? "Exchange" : "Pickup"} scheduled for ${item.scheduledDate}${item.courierPartner ? ` via ${item.courierPartner}` : ""}`
+          : `${isExchange ? "Exchange" : "Pickup"} date will be confirmed shortly`,
         icon: Calendar,
-        isComplete: actionStatus.includes("scheduled") || actionStatus.includes("picked_up"),
-        isCurrent: actionStatus.includes("scheduled") && !actionStatus.includes("picked_up"),
+        isComplete: scheduledComplete,
+        isCurrent: actionStatus.includes("scheduled") && !pickedUpComplete,
+        timestamp: item.scheduledDate,
       },
       {
         id: "picked_up",
-        label: `${actionLabel} Picked Up`,
-        description: "Item has been collected",
+        label: isExchange ? "Exchange Completed" : `${actionLabel} Picked Up`,
+        description: isExchange 
+          ? "New item delivered and old item collected"
+          : "Item has been collected by delivery partner",
         icon: Truck,
-        isComplete: actionStatus.includes("picked_up"),
+        isComplete: pickedUpComplete,
         isCurrent: false,
       },
     ];
@@ -133,6 +146,9 @@ export const PostDeliveryJourneySheet = ({
   item 
 }: PostDeliveryJourneySheetProps) => {
   const journeySteps = getJourneySteps(item);
+
+  // Determine if there's actual post-delivery activity
+  const hasActivity = item.installationRequired || (item.actionStatus && item.actionStatus !== "none");
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -158,6 +174,12 @@ export const PostDeliveryJourneySheet = ({
             <p className="text-xs text-muted-foreground">{item.variant}</p>
             {item.configuration && (
               <p className="text-xs text-muted-foreground">{item.configuration}</p>
+            )}
+            {item.installationRequired && (
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs">
+                <Wrench className="h-3 w-3" />
+                Installation Required
+              </span>
             )}
           </div>
         </div>
@@ -213,7 +235,7 @@ export const PostDeliveryJourneySheet = ({
 
                   {/* Content */}
                   <div className={cn("flex-1 pb-6", isLast && "pb-0")}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h5 className={cn(
                         "text-sm font-medium",
                         step.isCurrent && "text-primary",
@@ -240,6 +262,12 @@ export const PostDeliveryJourneySheet = ({
                         {step.description}
                       </p>
                     )}
+                    {step.timestamp && step.isCurrent && (
+                      <div className="flex items-center gap-1 mt-1.5 text-xs text-primary">
+                        <Clock className="h-3 w-3" />
+                        <span>{step.timestamp}</span>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               );
@@ -248,6 +276,15 @@ export const PostDeliveryJourneySheet = ({
         </div>
 
         {/* No activity yet */}
+        {!hasActivity && (
+          <div className="text-center py-8 text-muted-foreground">
+            <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-success" />
+            <p className="text-sm font-medium">Item Delivered Successfully</p>
+            <p className="text-xs mt-1">No post-delivery actions initiated yet</p>
+          </div>
+        )}
+
+        {/* Simple delivered state with no further actions */}
         {journeySteps.length === 1 && (
           <div className="text-center py-8 text-muted-foreground">
             <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-success" />
