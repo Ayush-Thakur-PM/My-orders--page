@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { TrackingTimeline } from "@/components/tracking/TrackingTimeline";
 import { ProductList } from "@/components/tracking/ProductList";
 import { OrderDetailsAccordion } from "@/components/tracking/OrderDetailsAccordion";
 import { StickyBottomCTA } from "@/components/ui/sticky-bottom-cta";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { CourierJourneySheet } from "@/components/tracking/CourierJourneySheet";
 import { FAQSection } from "@/components/tracking/FAQSection";
 import { getShipmentByOrderId, getOrderById } from "@/data/mockOrders";
-import { Calendar, Package, ChevronRight } from "lucide-react";
+import { Calendar, Package, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { OrderItem, ReturnReason } from "@/types/order";
 
 const ItemTracking = () => {
   const { orderId, shipmentId } = useParams();
   const [courierSheetOpen, setCourierSheetOpen] = useState(false);
+  const [shipmentUpdatesOpen, setShipmentUpdatesOpen] = useState(true);
 
   const shipment = orderId ? getShipmentByOrderId(orderId) : undefined;
   const order = orderId ? getOrderById(orderId) : undefined;
@@ -23,12 +25,26 @@ const ItemTracking = () => {
     return <Navigate to="/orders" replace />;
   }
 
-  const isActive = shipment.status !== "delivered" && shipment.status !== "cancelled";
+  const isDelivered = shipment.status === "delivered";
+  const isCancelled = shipment.status === "cancelled";
+  const isCompleted = isDelivered || isCancelled;
+
+  // Set shipment updates collapsed by default after delivery
+  useState(() => {
+    if (isDelivered) {
+      setShipmentUpdatesOpen(false);
+    }
+  });
 
   // Calculate package number (e.g., "Package 1/2")
   const totalPackages = order.shipments.length;
   const packageIndex = order.shipments.findIndex(s => s.id === shipment.id) + 1;
   const packageLabel = `Package ${packageIndex}/${totalPackages}`;
+
+  const handleItemAction = (item: OrderItem, action: string, reason: ReturnReason, notes: string) => {
+    // In production, this would call an API
+    console.log("Item action submitted:", { item, action, reason, notes });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -45,19 +61,47 @@ const ItemTracking = () => {
           <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
           <span className="text-foreground font-medium whitespace-nowrap">Track Shipment</span>
         </nav>
+
         {/* Hero Status Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-6 overflow-hidden rounded-2xl bg-card shadow-card"
         >
-          {/* Status header */}
+          {/* Status header - Refined for post-delivery */}
           <div className="border-b border-border/50 p-4">
             <div className="flex items-center justify-between">
-              <StatusBadge status={shipment.status} size="lg" />
-              <span className="text-sm font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
-                {packageLabel}
-              </span>
+              {/* Only show Package label, no status badge after delivery */}
+              {isDelivered ? (
+                <span className="text-sm font-medium text-muted-foreground">
+                  {packageLabel}
+                </span>
+              ) : isCancelled ? (
+                <>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-destructive/10 text-destructive text-sm font-medium">
+                    Cancelled
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
+                    {packageLabel}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className={cn(
+                    "inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium",
+                    shipment.status === "out_for_delivery" && "bg-warning/10 text-warning",
+                    shipment.status === "in_transit" && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+                    shipment.status === "processing" && "bg-secondary text-foreground"
+                  )}>
+                    {shipment.status === "out_for_delivery" && "Out for Delivery"}
+                    {shipment.status === "in_transit" && "In Transit"}
+                    {shipment.status === "processing" && "Processing"}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
+                    {packageLabel}
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
@@ -68,14 +112,14 @@ const ItemTracking = () => {
                 <Calendar className="h-5 w-5 text-primary" />
               </div>
               <div>
-                {shipment.status === "delivered" ? (
+                {isDelivered ? (
                   <>
                     <p className="text-sm text-muted-foreground">Delivered on</p>
                     <p className="text-lg font-semibold text-foreground">
                       {shipment.deliveredDate}
                     </p>
                   </>
-                ) : shipment.status === "cancelled" ? (
+                ) : isCancelled ? (
                   <>
                     <p className="text-sm text-destructive">Order Cancelled</p>
                     <p className="text-base text-muted-foreground">
@@ -113,27 +157,68 @@ const ItemTracking = () => {
           </div>
         </motion.div>
 
-        {/* Tracking Timeline */}
+        {/* Shipment Updates (formerly Tracking Updates) - Collapsible after delivery */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <h2 className="mb-4 text-lg font-semibold text-foreground">
-            Tracking Updates
-          </h2>
-          <div className="rounded-2xl bg-card p-4 shadow-card">
-            <TrackingTimeline 
-              milestones={shipment.milestones}
-              carrier={shipment.carrier}
-              trackingNumber={shipment.trackingNumber}
-              onCarrierClick={() => setCourierSheetOpen(true)}
-            />
-          </div>
+          {isDelivered ? (
+            // Collapsible toggle for delivered orders
+            <div className="rounded-2xl bg-card shadow-card overflow-hidden">
+              <button
+                onClick={() => setShipmentUpdatesOpen(!shipmentUpdatesOpen)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/50 transition-colors"
+              >
+                <h2 className="text-lg font-semibold text-foreground">
+                  Shipment Updates
+                </h2>
+                {shipmentUpdatesOpen ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
+              </button>
+              <AnimatePresence>
+                {shipmentUpdatesOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-4 pt-0">
+                      <TrackingTimeline 
+                        milestones={shipment.milestones}
+                        carrier={shipment.carrier}
+                        trackingNumber={shipment.trackingNumber}
+                        onCarrierClick={() => setCourierSheetOpen(true)}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            // Normal view for active orders
+            <>
+              <h2 className="mb-4 text-lg font-semibold text-foreground">
+                Shipment Updates
+              </h2>
+              <div className="rounded-2xl bg-card p-4 shadow-card">
+                <TrackingTimeline 
+                  milestones={shipment.milestones}
+                  carrier={shipment.carrier}
+                  trackingNumber={shipment.trackingNumber}
+                  onCarrierClick={() => setCourierSheetOpen(true)}
+                />
+              </div>
+            </>
+          )}
         </motion.section>
 
-        {/* Items in Shipment */}
+        {/* Items in Shipment - With item-level actions after delivery */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -149,7 +234,12 @@ const ItemTracking = () => {
               {shipment.items.length}
             </span>
           </div>
-          <ProductList items={shipment.items} />
+          <ProductList 
+            items={shipment.items} 
+            isDelivered={isDelivered}
+            shippingCity={shipment.shippingAddress.city}
+            onActionSubmit={handleItemAction}
+          />
         </motion.section>
 
         {/* Order Details Accordion */}
@@ -168,10 +258,18 @@ const ItemTracking = () => {
         <FAQSection />
       </main>
 
-      <StickyBottomCTA
-        primaryLabel="Contact Support"
-        secondaryLabel="Call Us"
-      />
+      {/* Sticky CTA - Only Contact Support after delivery/cancellation */}
+      {isCompleted ? (
+        <StickyBottomCTA
+          primaryLabel="Contact Support"
+          secondaryLabel="Call Us"
+        />
+      ) : (
+        <StickyBottomCTA
+          primaryLabel="Contact Support"
+          secondaryLabel="Call Us"
+        />
+      )}
 
       {/* Courier Journey Sheet */}
       {shipment.carrier && shipment.trackingNumber && (

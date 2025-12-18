@@ -21,6 +21,29 @@ export type OrderType = "normal" | "return" | "exchange" | "replacement";
 
 export type ActionStatus = "none" | "return_requested" | "return_in_progress" | "returned" | "replacement_in_progress" | "replaced" | "exchange_scheduled" | "exchanged";
 
+// Item-level action statuses for post-delivery journey
+export type ItemActionStatus = 
+  | "none"
+  | "return_requested"
+  | "return_approved"
+  | "return_scheduled"
+  | "return_picked_up"
+  | "replacement_requested"
+  | "replacement_approved"
+  | "replacement_scheduled"
+  | "replacement_picked_up"
+  | "exchange_requested"
+  | "exchange_approved"
+  | "exchange_scheduled"
+  | "exchange_picked_up";
+
+// Installation statuses
+export type InstallationStatus = 
+  | "not_required"
+  | "job_created"
+  | "technician_assigned"
+  | "installation_completed";
+
 // Metro cities eligible for exchange (simultaneous pickup & delivery)
 export const EXCHANGE_ELIGIBLE_CITIES = [
   "Bangalore", "Bengaluru",
@@ -38,6 +61,18 @@ export const isExchangeEligible = (city: string): boolean => {
   );
 };
 
+// Predefined reasons for return/replacement
+export const RETURN_REASONS = [
+  "Discomfort",
+  "Size Issue",
+  "Damaged Item",
+  "Quality Issue",
+  "Wrong Product Received",
+  "Other"
+] as const;
+
+export type ReturnReason = typeof RETURN_REASONS[number];
+
 export interface OrderItem {
   id: string;
   sku?: string;
@@ -47,6 +82,12 @@ export interface OrderItem {
   image: string;
   quantity: number;
   price: number;
+  // Item-level post-delivery tracking
+  actionStatus?: ItemActionStatus;
+  installationStatus?: InstallationStatus;
+  installationRequired?: boolean;
+  scheduledDate?: string;
+  courierPartner?: string;
 }
 
 export interface TrackingMilestone {
