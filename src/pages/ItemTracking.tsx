@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
@@ -16,25 +16,20 @@ import { OrderItem, ReturnReason } from "@/types/order";
 const ItemTracking = () => {
   const { orderId, shipmentId } = useParams();
   const [courierSheetOpen, setCourierSheetOpen] = useState(false);
-  const [shipmentUpdatesOpen, setShipmentUpdatesOpen] = useState(true);
 
   const shipment = orderId ? getShipmentByOrderId(orderId) : undefined;
   const order = orderId ? getOrderById(orderId) : undefined;
 
-  if (!shipment || !order) {
-    return <Navigate to="/orders" replace />;
-  }
-
-  const isDelivered = shipment.status === "delivered";
-  const isCancelled = shipment.status === "cancelled";
+  const isDelivered = shipment?.status === "delivered";
+  const isCancelled = shipment?.status === "cancelled";
   const isCompleted = isDelivered || isCancelled;
 
   // Set shipment updates collapsed by default after delivery
-  useState(() => {
-    if (isDelivered) {
-      setShipmentUpdatesOpen(false);
-    }
-  });
+  const [shipmentUpdatesOpen, setShipmentUpdatesOpen] = useState(!isDelivered);
+
+  if (!shipment || !order) {
+    return <Navigate to="/orders" replace />;
+  }
 
   // Calculate package number (e.g., "Package 1/2")
   const totalPackages = order.shipments.length;
