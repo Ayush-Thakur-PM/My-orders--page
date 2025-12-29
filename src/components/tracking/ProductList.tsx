@@ -7,6 +7,7 @@ interface ProductListProps {
   isDelivered?: boolean;
   shippingCity?: string;
   onActionSubmit?: (item: OrderItem, action: string, reason: ReturnReason, notes: string) => void;
+  highlightedItemId?: string;
 }
 
 export const ProductList = ({ 
@@ -14,7 +15,8 @@ export const ProductList = ({
   showSku = true, 
   isDelivered = false,
   shippingCity = "",
-  onActionSubmit 
+  onActionSubmit,
+  highlightedItemId 
 }: ProductListProps) => {
   return (
     <div className="space-y-3">
@@ -26,6 +28,7 @@ export const ProductList = ({
           isDelivered={isDelivered}
           shippingCity={shippingCity}
           onActionSubmit={onActionSubmit}
+          isHighlighted={item.id === highlightedItemId}
         />
       ))}
     </div>
