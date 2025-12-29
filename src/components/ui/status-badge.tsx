@@ -30,7 +30,7 @@ const statusConfig: Record<ShipmentStatus, {
     icon: MapPin,
   },
   delivered: {
-    label: "Delivered",
+    label: "Package Delivered",
     className: "bg-success/10 text-success",
     icon: CheckCircle2,
   },
