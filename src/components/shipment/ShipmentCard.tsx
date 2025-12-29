@@ -84,7 +84,7 @@ export const ShipmentCard = ({
           )}
         </div>
 
-        {/* Collapsible Product List */}
+        {/* Collapsible Product List with clickable items */}
         {isExpanded ? (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -92,7 +92,11 @@ export const ShipmentCard = ({
             exit={{ opacity: 0, height: 0 }}
             className="mb-4"
           >
-            <PackageItemList items={shipment.items} />
+            <PackageItemList 
+              items={shipment.items} 
+              orderId={shipment.orderId}
+              shipmentId={shipment.id}
+            />
           </motion.div>
         ) : (
           /* Product thumbnails - 72px uniform tiles */
@@ -191,13 +195,13 @@ export const ShipmentCard = ({
           </div>
         )}
 
-        {/* Metro city indicator for exchange eligibility */}
+        {/* Exchange eligibility indicator at parcel level */}
         {isMetroCity && shipment.status === "delivered" && (
           <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
-              Exchange eligible
+            <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full font-medium">
+              Some items eligible for exchange
             </span>
-            <span>Simultaneous pickup & delivery available</span>
+            <span>Simultaneous pickup & delivery</span>
           </div>
         )}
       </div>

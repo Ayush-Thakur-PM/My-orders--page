@@ -12,6 +12,7 @@ interface ItemCardProps {
   isDelivered: boolean;
   shippingCity: string;
   onActionSubmit?: (item: OrderItem, action: string, reason: ReturnReason, notes: string) => void;
+  isHighlighted?: boolean;
 }
 
 // Get status badge for action status
@@ -45,7 +46,6 @@ const getActionStatusBadge = (status: ItemActionStatus | undefined) => {
 
 // Get status badge for installation status
 const getInstallationStatusBadge = (status: InstallationStatus | undefined, installationRequired: boolean | undefined) => {
-  // Don't show badge if installation is not required
   if (!installationRequired || !status || status === "not_required") return null;
 
   const statusConfig: Record<string, { label: string; className: string }> = {
@@ -64,15 +64,28 @@ const getInstallationStatusBadge = (status: InstallationStatus | undefined, inst
   );
 };
 
+// Helper to determine exchange eligibility per item
+const isItemExchangeEligible = (item: OrderItem): boolean => {
+  const name = item.name.toLowerCase();
+  // Pillows are NOT exchange eligible
+  if (name.includes("pillow")) return false;
+  // Everything else is exchange eligible
+  return true;
+};
+
 export const ItemCard = ({ 
   item, 
   index, 
   isDelivered, 
   shippingCity,
-  onActionSubmit 
+  onActionSubmit,
+  isHighlighted = false
 }: ItemCardProps) => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [showJourneySheet, setShowJourneySheet] = useState(false);
+
+  // Check exchange eligibility at item level
+  const exchangeEligible = isDelivered && isItemExchangeEligible(item) && isExchangeEligible(shippingCity);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -103,7 +116,12 @@ export const ItemCard = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        className="rounded-xl bg-card p-4 shadow-card border border-border/50"
+        className={cn(
+          "rounded-xl bg-card p-4 shadow-card border transition-all duration-300",
+          isHighlighted 
+            ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
+            : "border-border/50"
+        )}
       >
         <div className="flex gap-4">
           {/* 72px uniform thumbnail */}
@@ -141,6 +159,12 @@ export const ItemCard = ({
           <div className="mt-3 flex flex-wrap gap-2">
             {getInstallationStatusBadge(item.installationStatus, item.installationRequired)}
             {getActionStatusBadge(item.actionStatus)}
+            {/* Exchange eligibility badge at item level */}
+            {exchangeEligible && !hasActiveAction && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
+                Exchange eligible
+              </span>
+            )}
           </div>
         )}
 

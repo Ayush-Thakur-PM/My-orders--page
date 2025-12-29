@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useParams, Navigate, Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { TrackingTimeline } from "@/components/tracking/TrackingTimeline";
@@ -15,7 +15,10 @@ import { OrderItem, ReturnReason } from "@/types/order";
 
 const ItemTracking = () => {
   const { orderId, shipmentId } = useParams();
+  const [searchParams] = useSearchParams();
   const [courierSheetOpen, setCourierSheetOpen] = useState(false);
+  const itemsSectionRef = useRef<HTMLDivElement>(null);
+  const highlightedItemId = searchParams.get("item");
 
   const shipment = orderId ? getShipmentByOrderId(orderId) : undefined;
   const order = orderId ? getOrderById(orderId) : undefined;
@@ -26,6 +29,15 @@ const ItemTracking = () => {
 
   // Set shipment updates collapsed by default after delivery
   const [shipmentUpdatesOpen, setShipmentUpdatesOpen] = useState(!isDelivered);
+
+  // Auto-scroll to items section when delivered or when item param present
+  useEffect(() => {
+    if ((isDelivered || highlightedItemId) && itemsSectionRef.current) {
+      setTimeout(() => {
+        itemsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  }, [isDelivered, highlightedItemId]);
 
   if (!shipment || !order) {
     return <Navigate to="/orders" replace />;
@@ -215,10 +227,12 @@ const ItemTracking = () => {
 
         {/* Items in Shipment - With item-level actions after delivery */}
         <motion.section
+          ref={itemsSectionRef}
+          id="items-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-6"
+          className="mb-6 scroll-mt-4"
         >
           <div className="mb-4 flex items-center gap-2">
             <Package className="h-5 w-5 text-muted-foreground" />
@@ -234,6 +248,7 @@ const ItemTracking = () => {
             isDelivered={isDelivered}
             shippingCity={shipment.shippingAddress.city}
             onActionSubmit={handleItemAction}
+            highlightedItemId={highlightedItemId || undefined}
           />
         </motion.section>
 
