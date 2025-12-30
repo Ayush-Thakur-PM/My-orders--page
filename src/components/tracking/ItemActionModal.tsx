@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { OrderItem, RETURN_REASONS, ReturnReason, isExchangeEligible } from "@/types/order";
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { RotateCcw, RefreshCw, ArrowLeftRight, CheckCircle2, Calendar, Truck } from "lucide-react";
+import { RotateCcw, RefreshCw, ArrowLeftRight, CheckCircle2, ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, addDays } from "date-fns";
 
 type ActionType = "return" | "replacement" | "exchange";
 type ModalStep = "form" | "confirmation";
@@ -45,19 +44,32 @@ export const ItemActionModal = ({
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
   const [reason, setReason] = useState<ReturnReason | "">("");
   const [notes, setNotes] = useState("");
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isMetroCity = isExchangeEligible(shippingCity);
-  const expectedDate = format(addDays(new Date(), 4), "EEE, dd MMM yyyy");
 
-  const handleSubmit = () => {
-    if (!selectedAction || !reason) return;
-    setStep("confirmation");
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setUploadedImages(prev => [...prev, ...Array.from(files)]);
+    }
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  const handleConfirm = () => {
-    if (!selectedAction || !reason) return;
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const canSubmit = selectedAction && reason && uploadedImages.length > 0;
+
+  const handleSubmit = () => {
+    if (!canSubmit) return;
     onSubmit(item, selectedAction, reason as ReturnReason, notes);
-    handleClose();
+    setStep("confirmation");
   };
 
   const handleClose = () => {
@@ -65,6 +77,7 @@ export const ItemActionModal = ({
     setSelectedAction(null);
     setReason("");
     setNotes("");
+    setUploadedImages([]);
     onOpenChange(false);
   };
 
@@ -188,6 +201,52 @@ export const ItemActionModal = ({
           </Select>
         </div>
 
+        {/* Image Upload */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Upload Images *</Label>
+          <p className="text-xs text-muted-foreground">Please upload photos of the product to help us process your request</p>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          
+          {uploadedImages.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {uploadedImages.map((file, index) => (
+                <div key={index} className="relative h-16 w-16 rounded-lg overflow-hidden bg-secondary">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`Upload ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-sm"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full mt-2"
+          >
+            <ImagePlus className="h-4 w-4 mr-2" />
+            {uploadedImages.length > 0 ? "Add More Images" : "Upload Images"}
+          </Button>
+        </div>
+
         {/* Notes */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Additional Notes (Optional)</Label>
@@ -211,7 +270,7 @@ export const ItemActionModal = ({
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={!selectedAction || !reason}
+          disabled={!canSubmit}
           className="flex-1"
         >
           Submit Request
@@ -226,27 +285,27 @@ export const ItemActionModal = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="text-center py-4"
+      className="text-center py-6"
     >
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-        className="mx-auto w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4"
+        className="mx-auto w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-5"
       >
         <CheckCircle2 className="h-8 w-8 text-success" />
       </motion.div>
       
-      <DialogHeader className="space-y-2">
+      <DialogHeader className="space-y-3">
         <DialogTitle className="text-xl">
-          {getActionLabel()} Request Submitted
+          Request Registered
         </DialogTitle>
-        <DialogDescription>
-          We've received your request and will process it shortly.
+        <DialogDescription className="text-base">
+          Your request has been registered. Our team will get back to you.
         </DialogDescription>
       </DialogHeader>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6">
         {/* Item info */}
         <div className="flex gap-3 p-3 bg-secondary/50 rounded-xl text-left">
           <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
@@ -261,79 +320,9 @@ export const ItemActionModal = ({
             <p className="text-xs text-muted-foreground">{item.variant}</p>
           </div>
         </div>
-
-        {/* Next Steps */}
-        <div className="bg-secondary/50 rounded-xl p-4 text-left space-y-3">
-          <h4 className="font-medium text-sm">What happens next?</h4>
-          <div className="space-y-2">
-            {selectedAction === "return" && (
-              <>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">1</span>
-                  <span>Our team will review your request within 24 hours</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">2</span>
-                  <span>Delivery partner will pick up the item</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">3</span>
-                  <span>Refund processed within 5-7 business days</span>
-                </div>
-              </>
-            )}
-            {selectedAction === "replacement" && (
-              <>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">1</span>
-                  <span>Our team will review your request within 24 hours</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">2</span>
-                  <span>Delivery partner will pick up the old item</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">3</span>
-                  <span>New item will be shipped once pickup is complete</span>
-                </div>
-              </>
-            )}
-            {selectedAction === "exchange" && (
-              <>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">1</span>
-                  <span>Our team will review your request within 24 hours</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">2</span>
-                  <span>Delivery partner will arrive with your new item</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-medium shrink-0">3</span>
-                  <span>Hand over the old item during delivery — exchange completed in a single visit!</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Expected Date */}
-        <div className="flex items-center justify-center gap-3 py-3 px-4 bg-primary/5 rounded-xl">
-          <div className="flex items-center gap-2">
-            {selectedAction === "exchange" ? (
-              <Truck className="h-5 w-5 text-primary" />
-            ) : (
-              <Calendar className="h-5 w-5 text-primary" />
-            )}
-            <span className="text-sm text-muted-foreground">
-              {selectedAction === "exchange" ? "Expected exchange" : "Expected pickup"}
-            </span>
-          </div>
-          <span className="font-semibold text-foreground">{expectedDate}</span>
-        </div>
       </div>
 
-      <Button onClick={handleConfirm} className="w-full mt-6">
+      <Button onClick={handleClose} className="w-full mt-6">
         Done
       </Button>
     </motion.div>

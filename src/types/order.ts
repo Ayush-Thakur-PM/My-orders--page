@@ -63,12 +63,11 @@ export const isExchangeEligible = (city: string): boolean => {
 
 // Predefined reasons for return/replacement
 export const RETURN_REASONS = [
+  "Wrong Size Received",
+  "Wrong Size Ordered",
   "Discomfort",
-  "Size Issue",
-  "Damaged Item",
-  "Quality Issue",
-  "Wrong Product Received",
-  "Other"
+  "Incorrect Product Received",
+  "Damaged Product Received",
 ] as const;
 
 export type ReturnReason = typeof RETURN_REASONS[number];
