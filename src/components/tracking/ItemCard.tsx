@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { OrderItem, ItemActionStatus, InstallationStatus, ReturnReason, isExchangeEligible } from "@/types/order";
 import { ItemActionModal } from "./ItemActionModal";
 import { PostDeliveryJourneySheet } from "./PostDeliveryJourneySheet";
@@ -83,7 +83,18 @@ export const ItemCard = ({
 }: ItemCardProps) => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [showJourneySheet, setShowJourneySheet] = useState(false);
+  const [showHighlight, setShowHighlight] = useState(isHighlighted);
 
+  // Fade out the highlight after 2 seconds
+  useEffect(() => {
+    if (isHighlighted) {
+      setShowHighlight(true);
+      const timer = setTimeout(() => {
+        setShowHighlight(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isHighlighted]);
   // Check exchange eligibility at item level
   const exchangeEligible = isDelivered && isItemExchangeEligible(item) && isExchangeEligible(shippingCity);
 
@@ -114,22 +125,27 @@ export const ItemCard = ({
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
-        animate={{ 
-          opacity: 1, 
-          y: 0,
-          backgroundColor: isHighlighted ? "hsl(var(--primary) / 0.05)" : "hsl(var(--card))"
-        }}
-        transition={{ 
-          delay: index * 0.1,
-          backgroundColor: { duration: 2, ease: "easeOut" }
-        }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
         className={cn(
-          "rounded-xl bg-card p-4 shadow-card border transition-all duration-300",
+          "rounded-xl bg-card p-4 shadow-card border transition-all duration-300 relative overflow-hidden",
           isHighlighted 
-            ? "border-primary ring-2 ring-primary/20 animate-[pulse_1s_ease-in-out_2]" 
+            ? "border-primary ring-2 ring-primary/20" 
             : "border-border/50"
         )}
       >
+        {/* Highlight overlay with fade-out animation */}
+        <AnimatePresence>
+          {showHighlight && (
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: [1, 0.7, 1, 0.7, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2, ease: "easeOut" }}
+              className="absolute inset-0 bg-primary/15 rounded-xl pointer-events-none"
+            />
+          )}
+        </AnimatePresence>
         <div className="flex gap-4">
           {/* 72px uniform thumbnail */}
           <div className="h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
