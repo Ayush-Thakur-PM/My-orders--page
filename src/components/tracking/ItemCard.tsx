@@ -115,7 +115,7 @@ export const ItemCard = ({
 
   const handleActionSubmit = (item: OrderItem, action: string, reason: ReturnReason, notes: string) => {
     onActionSubmit?.(item, action, reason, notes);
-    setShowActionModal(false);
+    // Modal stays open to show confirmation screen - closed by user via "Done" button
   };
 
   // Check if item has any post-delivery journey to show
