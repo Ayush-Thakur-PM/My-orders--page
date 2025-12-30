@@ -114,12 +114,19 @@ export const ItemCard = ({
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1 }}
+        animate={{ 
+          opacity: 1, 
+          y: 0,
+          backgroundColor: isHighlighted ? "hsl(var(--primary) / 0.05)" : "hsl(var(--card))"
+        }}
+        transition={{ 
+          delay: index * 0.1,
+          backgroundColor: { duration: 2, ease: "easeOut" }
+        }}
         className={cn(
           "rounded-xl bg-card p-4 shadow-card border transition-all duration-300",
           isHighlighted 
-            ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
+            ? "border-primary ring-2 ring-primary/20 animate-[pulse_1s_ease-in-out_2]" 
             : "border-border/50"
         )}
       >
