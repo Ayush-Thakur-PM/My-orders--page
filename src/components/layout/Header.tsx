@@ -55,7 +55,7 @@ export const Header = ({
       )}
       
       {/* Main Header */}
-      <div className="container flex h-14 items-center justify-between md:h-16">
+      <div className="container flex h-14 items-center justify-between md:h-16 max-w-2xl mx-auto">
         <div className="flex items-center gap-3">
           {showBack && (
             <button

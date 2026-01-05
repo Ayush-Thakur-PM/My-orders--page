@@ -57,7 +57,7 @@ const ItemTracking = () => {
     <div className="min-h-screen bg-background pb-28">
       <Header title="Track Package" showBack showBrandTitle />
 
-      <main className="container px-4 py-6">
+      <main className="container px-4 py-6 lg:py-8 max-w-2xl mx-auto">
         {/* Breadcrumb Navigation */}
         <nav className="mb-4 flex items-center gap-1 text-sm text-muted-foreground overflow-x-auto">
           <Link to="/orders" className="hover:text-foreground transition-colors whitespace-nowrap">

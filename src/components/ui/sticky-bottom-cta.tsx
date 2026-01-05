@@ -34,7 +34,7 @@ export const StickyBottomCTA = ({
       )}
       style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1rem)" }}
     >
-      <div className="container flex gap-3">
+      <div className="container flex gap-3 max-w-2xl mx-auto">
         {secondaryLabel && (
           <button
             onClick={secondaryAction}

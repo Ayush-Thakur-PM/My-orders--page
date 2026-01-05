@@ -8,7 +8,7 @@ const Wishlist = () => {
     <div className="min-h-screen bg-background pb-28">
       <Header title="Wishlist" />
 
-      <main className="container px-4 py-6">
+      <main className="container px-4 py-6 lg:py-8 max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

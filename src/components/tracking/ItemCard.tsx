@@ -128,7 +128,8 @@ export const ItemCard = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
         className={cn(
-          "rounded-xl bg-card p-4 shadow-card border transition-all duration-300 relative overflow-hidden",
+          "rounded-xl bg-card p-4 lg:p-5 shadow-card border transition-all duration-300 relative overflow-hidden",
+          "lg:hover:shadow-lg lg:hover:border-border",
           isHighlighted 
             ? "border-primary ring-2 ring-primary/20" 
             : "border-border/50"
