@@ -18,7 +18,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background pb-28">
       <Header title="Profile" />
 
-      <main className="container px-4 py-6">
+      <main className="container px-4 py-6 lg:py-8 max-w-2xl mx-auto">
         {/* Profile Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}

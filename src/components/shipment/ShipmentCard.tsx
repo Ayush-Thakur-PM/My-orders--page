@@ -44,7 +44,7 @@ export const ShipmentCard = ({
     delay: index * 0.1,
     duration: 0.4
   }}>
-      <div className={cn("rounded-2xl bg-card p-4 shadow-card transition-all duration-300", "border border-border/50", isActive && "ring-1 ring-primary/10")}>
+      <div className={cn("rounded-2xl bg-card p-4 lg:p-5 shadow-card transition-all duration-300", "border border-border/50 lg:hover:shadow-lg lg:hover:border-border", isActive && "ring-1 ring-primary/10")}>
         {/* Status row */}
         <div className="mb-3 flex items-center flex-wrap gap-2">
           <StatusBadge status={shipment.status} />
