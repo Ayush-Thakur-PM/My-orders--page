@@ -226,34 +226,34 @@ export const PackageItemList = ({
                     </div>
                   )}
 
-                  {/* Inline action CTAs - matching ItemCard styling */}
-                  {showInlineActions && (
-                    <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-2">
-                      {/* View Journey Button (if has active action or installation) */}
+                  {/* Inline action CTAs - lightweight pill style */}
+                  {showInlineActions && (hasPostDeliveryJourney(item) || (canInitiateAction(item) && onActionClick)) && (
+                    <div className="mt-2.5 flex items-center gap-2">
+                      {/* View Journey - ghost pill style */}
                       {hasPostDeliveryJourney(item) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setJourneyItem(item);
                           }}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-secondary/80 transition-colors"
+                          className="flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium text-muted-foreground bg-muted/60 hover:bg-muted transition-colors"
                         >
-                          View Journey
-                          <ChevronRight className="h-4 w-4" />
+                          <span>View Journey</span>
+                          <ChevronRight className="h-3.5 w-3.5" />
                         </button>
                       )}
 
-                      {/* Replace/Return Button - Opens Modal */}
+                      {/* Replace/Return - subtle outline pill */}
                       {canInitiateAction(item) && onActionClick && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onActionClick(item);
                           }}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors border border-primary text-primary hover:bg-primary/5"
+                          className="flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium border border-border text-foreground hover:border-primary/50 hover:text-primary transition-colors"
                         >
-                          <RotateCcw className="h-4 w-4" />
-                          Replace / Return
+                          <RotateCcw className="h-3.5 w-3.5" />
+                          <span>Replace / Return</span>
                         </button>
                       )}
                     </div>
