@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { OrderItem, ItemActionStatus, InstallationStatus } from "@/types/order";
+import { PostDeliveryJourneySheet } from "@/components/tracking/PostDeliveryJourneySheet";
+import { RotateCcw, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PackageItemListProps {
@@ -10,9 +13,7 @@ interface PackageItemListProps {
   shipmentId?: string;
   onItemClick?: (itemId: string) => void;
   showInlineActions?: boolean;
-  onReturnClick?: (item: OrderItem) => void;
-  onReplaceClick?: (item: OrderItem) => void;
-  onExchangeClick?: (item: OrderItem) => void;
+  onActionClick?: (item: OrderItem) => void;
 }
 
 // Helper to determine exchange eligibility per item
@@ -80,11 +81,10 @@ export const PackageItemList = ({
   shipmentId,
   onItemClick,
   showInlineActions = false,
-  onReturnClick,
-  onReplaceClick,
-  onExchangeClick
+  onActionClick
 }: PackageItemListProps) => {
   const navigate = useNavigate();
+  const [journeyItem, setJourneyItem] = useState<OrderItem | null>(null);
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -139,6 +139,17 @@ export const PackageItemList = ({
 
   const isClickable = !!(onItemClick || (orderId && shipmentId));
   const isExchangeEligibleItem = (item: OrderItem) => isItemExchangeEligible(item);
+
+  // Check if item has any post-delivery journey to show
+  const hasPostDeliveryJourney = (item: OrderItem) => {
+    const hasActiveAction = item.actionStatus && item.actionStatus !== "none";
+    return hasActiveAction || item.installationRequired;
+  };
+
+  // Check if item can initiate action (no active action in progress)
+  const canInitiateAction = (item: OrderItem) => {
+    return !(item.actionStatus && item.actionStatus !== "none");
+  };
 
   return (
     <div className="space-y-3">
@@ -215,40 +226,34 @@ export const PackageItemList = ({
                     </div>
                   )}
 
-                  {/* Inline action CTAs - prominent styling */}
-                  {showInlineActions && !hasAction && (
-                    <div className="mt-3 pt-3 border-t border-border/50 flex flex-wrap gap-2">
-                      {isExchangeEligibleItem(item) && onExchangeClick && (
+                  {/* Inline action CTAs - matching ItemCard styling */}
+                  {showInlineActions && (
+                    <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-2">
+                      {/* View Journey Button (if has active action or installation) */}
+                      {hasPostDeliveryJourney(item) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onExchangeClick(item);
+                            setJourneyItem(item);
                           }}
-                          className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-600 text-white hover:bg-purple-700 active:scale-[0.98] transition-all shadow-sm"
+                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-secondary/80 transition-colors"
                         >
-                          Exchange
+                          View Journey
+                          <ChevronRight className="h-4 w-4" />
                         </button>
                       )}
-                      {onReplaceClick && (
+
+                      {/* Replace/Return Button - Opens Modal */}
+                      {canInitiateAction(item) && onActionClick && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onReplaceClick(item);
+                            onActionClick(item);
                           }}
-                          className="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
+                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors border border-primary text-primary hover:bg-primary/5"
                         >
-                          Replace
-                        </button>
-                      )}
-                      {onReturnClick && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onReturnClick(item);
-                          }}
-                          className="px-4 py-2 text-xs font-semibold rounded-lg border-2 border-primary text-primary bg-primary/5 hover:bg-primary/10 active:scale-[0.98] transition-all"
-                        >
-                          Return
+                          <RotateCcw className="h-4 w-4" />
+                          Replace / Return
                         </button>
                       )}
                     </div>
@@ -259,6 +264,15 @@ export const PackageItemList = ({
           </div>
         </motion.div>
       ))}
+
+      {/* Post-Delivery Journey Sheet */}
+      {journeyItem && (
+        <PostDeliveryJourneySheet
+          open={!!journeyItem}
+          onOpenChange={(open) => !open && setJourneyItem(null)}
+          item={journeyItem}
+        />
+      )}
     </div>
   );
 };
