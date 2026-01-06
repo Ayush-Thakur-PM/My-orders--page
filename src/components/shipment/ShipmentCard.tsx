@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Package, ChevronDown, ChevronUp } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Shipment, isExchangeEligible } from "@/types/order";
+import { Shipment, isExchangeEligible, OrderItem } from "@/types/order";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ActionStatusBadge } from "@/components/ui/action-status-badge";
 import { PackageItemList } from "./PackageItemList";
 import { cn } from "@/lib/utils";
+
 interface ShipmentCardProps {
   shipment: Shipment;
   index?: number;
@@ -21,6 +22,7 @@ export const ShipmentCard = ({
   totalPackages = 1,
   showItemDetails = false
 }: ShipmentCardProps) => {
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(showItemDetails);
   const isActive = shipment.status !== "delivered" && shipment.status !== "cancelled";
   const itemCount = shipment.items.length;
@@ -29,10 +31,20 @@ export const ShipmentCard = ({
 
   // Determine exchange eligibility based on city
   const isMetroCity = isExchangeEligible(shipment.shippingAddress.city);
+  const isDelivered = shipment.status === "delivered";
+  
   const handleExpandClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsExpanded(!isExpanded);
+  };
+
+  const handleReturnClick = (item: OrderItem) => {
+    navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=return`);
+  };
+
+  const handleExchangeClick = (item: OrderItem) => {
+    navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=exchange`);
   };
   return <motion.div initial={{
     opacity: 0,
@@ -79,7 +91,14 @@ export const ShipmentCard = ({
         opacity: 0,
         height: 0
       }} className="mb-4">
-            <PackageItemList items={shipment.items} orderId={shipment.orderId} shipmentId={shipment.id} />
+            <PackageItemList 
+              items={shipment.items} 
+              orderId={shipment.orderId} 
+              shipmentId={shipment.id}
+              showInlineActions={isDelivered}
+              onReturnClick={isDelivered ? handleReturnClick : undefined}
+              onExchangeClick={isDelivered && isMetroCity ? handleExchangeClick : undefined}
+            />
           </motion.div> : (/* Product thumbnails - 72px uniform tiles */
       <div className="flex items-center justify-between mb-4">
             <div className="flex items-center -space-x-2">
