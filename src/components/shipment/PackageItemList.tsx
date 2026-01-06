@@ -196,46 +196,53 @@ export const PackageItemList = ({
               )}
             </div>
 
-            {/* Status badges - visible for items with post-delivery actions */}
-            {(item.actionStatus || item.installationRequired) && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {getInstallationStatusBadge(item.installationStatus, item.installationRequired)}
-                {getActionStatusBadge(item.actionStatus)}
-                {isExchangeEligibleItem(item) && !item.actionStatus && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
-                    Exchange eligible
-                  </span>
-                )}
-              </div>
-            )}
+            {(() => {
+              const hasAction = !!(item.actionStatus && item.actionStatus !== "none");
+              return (
+                <>
+                  {/* Status badges - visible for items with post-delivery actions */}
+                  {(hasAction || item.installationRequired) && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {getInstallationStatusBadge(item.installationStatus, item.installationRequired)}
+                      {getActionStatusBadge(item.actionStatus)}
+                      {isExchangeEligibleItem(item) && !hasAction && (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
+                          Exchange eligible
+                        </span>
+                      )}
+                    </div>
+                  )}
 
-            {/* Inline action CTAs */}
-            {showInlineActions && !item.actionStatus && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {isExchangeEligibleItem(item) && onExchangeClick && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onExchangeClick(item);
-                    }}
-                    className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
-                  >
-                    Exchange
-                  </button>
-                )}
-                {onReturnClick && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onReturnClick(item);
-                    }}
-                    className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
-                  >
-                    Return
-                  </button>
-                )}
-              </div>
-            )}
+                  {/* Inline action CTAs */}
+                  {showInlineActions && !hasAction && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {isExchangeEligibleItem(item) && onExchangeClick && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onExchangeClick(item);
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                        >
+                          Exchange
+                        </button>
+                      )}
+                      {onReturnClick && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onReturnClick(item);
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                        >
+                          Return
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </motion.div>
       ))}
