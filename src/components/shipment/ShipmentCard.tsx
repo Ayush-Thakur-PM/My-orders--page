@@ -43,6 +43,10 @@ export const ShipmentCard = ({
     navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=return`);
   };
 
+  const handleReplaceClick = (item: OrderItem) => {
+    navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=replacement`);
+  };
+
   const handleExchangeClick = (item: OrderItem) => {
     navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=exchange`);
   };
@@ -97,6 +101,7 @@ export const ShipmentCard = ({
               shipmentId={shipment.id}
               showInlineActions={isDelivered}
               onReturnClick={isDelivered ? handleReturnClick : undefined}
+              onReplaceClick={isDelivered ? handleReplaceClick : undefined}
               onExchangeClick={isDelivered && isMetroCity ? handleExchangeClick : undefined}
             />
           </motion.div> : (/* Product thumbnails - 72px uniform tiles */

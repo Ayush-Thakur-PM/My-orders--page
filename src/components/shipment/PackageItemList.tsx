@@ -11,6 +11,7 @@ interface PackageItemListProps {
   onItemClick?: (itemId: string) => void;
   showInlineActions?: boolean;
   onReturnClick?: (item: OrderItem) => void;
+  onReplaceClick?: (item: OrderItem) => void;
   onExchangeClick?: (item: OrderItem) => void;
 }
 
@@ -80,6 +81,7 @@ export const PackageItemList = ({
   onItemClick,
   showInlineActions = false,
   onReturnClick,
+  onReplaceClick,
   onExchangeClick
 }: PackageItemListProps) => {
   const navigate = useNavigate();
@@ -225,6 +227,17 @@ export const PackageItemList = ({
                           className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
                         >
                           Exchange
+                        </button>
+                      )}
+                      {onReplaceClick && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onReplaceClick(item);
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                        >
+                          Replace
                         </button>
                       )}
                       {onReturnClick && (
