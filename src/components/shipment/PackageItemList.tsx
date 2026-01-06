@@ -215,16 +215,16 @@ export const PackageItemList = ({
                     </div>
                   )}
 
-                  {/* Inline action CTAs */}
+                  {/* Inline action CTAs - prominent styling */}
                   {showInlineActions && !hasAction && (
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 pt-3 border-t border-border/50 flex flex-wrap gap-2">
                       {isExchangeEligibleItem(item) && onExchangeClick && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onExchangeClick(item);
                           }}
-                          className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                          className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-600 text-white hover:bg-purple-700 active:scale-[0.98] transition-all shadow-sm"
                         >
                           Exchange
                         </button>
@@ -235,7 +235,7 @@ export const PackageItemList = ({
                             e.stopPropagation();
                             onReplaceClick(item);
                           }}
-                          className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                          className="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
                         >
                           Replace
                         </button>
@@ -246,7 +246,7 @@ export const PackageItemList = ({
                             e.stopPropagation();
                             onReturnClick(item);
                           }}
-                          className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                          className="px-4 py-2 text-xs font-semibold rounded-lg border-2 border-primary text-primary bg-primary/5 hover:bg-primary/10 active:scale-[0.98] transition-all"
                         >
                           Return
                         </button>
