@@ -48,7 +48,7 @@ const getActionStatusBadge = (status: ItemActionStatus | undefined) => {
   if (!config) return null;
 
   return (
-    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap", config.className)}>
+    <span className={cn("px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap", config.className)}>
       {config.label}
     </span>
   );
@@ -68,7 +68,7 @@ const getInstallationStatusBadge = (status: InstallationStatus | undefined, inst
   if (!config) return null;
 
   return (
-    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap", config.className)}>
+    <span className={cn("px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap", config.className)}>
       {config.label}
     </span>
   );
@@ -153,117 +153,109 @@ export const PackageItemList = ({
 
   return (
     <div className="space-y-3">
-      {items.map((item, index) => (
-        <motion.div
-          key={item.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
-          onClick={() => isClickable && handleItemClick(item.id)}
-          className={cn(
-            "flex gap-4 rounded-xl border border-border/50 bg-card p-3",
-            "transition-all",
-            isClickable && "cursor-pointer hover:shadow-md hover:border-primary/30 hover:bg-secondary/30"
-          )}
-        >
-          {/* Uniform 72px thumbnail */}
-          <div className="h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
-            <img
-              src={item.image}
-              alt={item.name}
-              className="h-full w-full object-cover object-center"
-              loading="lazy"
-            />
-          </div>
+      {items.map((item, index) => {
+        const hasAction = !!(item.actionStatus && item.actionStatus !== "none");
+        const showCTAs = showInlineActions && (hasPostDeliveryJourney(item) || (canInitiateAction(item) && onActionClick));
 
-          <div className="flex-1 min-w-0">
-            {/* SKU */}
-            {item.sku && (
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-0.5">
-                {item.sku}
-              </p>
-            )}
-            
-            {/* Product Name */}
-            <p className="text-sm font-semibold text-foreground leading-tight mb-1">
-              {item.name}
-            </p>
-            
-            {/* Variant & Configuration */}
-            <p className="text-xs text-muted-foreground mb-1">
-              {item.variant}
-              {item.configuration && (
-                <span className="ml-1 text-muted-foreground/70">• {item.configuration}</span>
+        return (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.04 }}
+            className="rounded-xl border border-border/40 bg-card overflow-hidden"
+          >
+            {/* Zone 1 & 2: Image Row - Visual Anchor + Item Info */}
+            <div
+              onClick={() => isClickable && handleItemClick(item.id)}
+              className={cn(
+                "flex gap-3 p-3",
+                isClickable && "cursor-pointer hover:bg-secondary/30 transition-colors"
               )}
-            </p>
-            
-            {/* Price & Quantity */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                {formatPrice(item.price)}
-              </span>
-              {item.quantity > 1 && (
-                <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                  Qty: {item.quantity}
-                </span>
-              )}
+            >
+              {/* Zone 1: Visual Anchor - Fixed size image */}
+              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="h-full w-full object-cover object-center"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Zone 2: Item Information */}
+              <div className="flex-1 min-w-0">
+                {/* Product Name - Primary */}
+                <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2">
+                  {item.name}
+                </p>
+                
+                {/* Variant & Configuration - Secondary */}
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                  {item.variant}
+                  {item.configuration && ` • ${item.configuration}`}
+                </p>
+                
+                {/* Price */}
+                <p className="text-sm font-medium text-foreground mt-1">
+                  {formatPrice(item.price)}
+                  {item.quantity > 1 && (
+                    <span className="text-xs text-muted-foreground font-normal ml-1.5">
+                      × {item.quantity}
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
 
-            {(() => {
-              const hasAction = !!(item.actionStatus && item.actionStatus !== "none");
-              return (
-                <>
-                  {/* Status badges - visible for items with post-delivery actions */}
-                  {(hasAction || item.installationRequired) && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {getInstallationStatusBadge(item.installationStatus, item.installationRequired)}
-                      {getActionStatusBadge(item.actionStatus)}
-                      {isExchangeEligibleItem(item) && !hasAction && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
-                          Exchange eligible
-                        </span>
-                      )}
-                    </div>
-                  )}
+            {/* Status Badges Row - if applicable */}
+            {(hasAction || item.installationRequired || (showInlineActions && isExchangeEligibleItem(item) && !hasAction)) && (
+              <div className="px-3 pb-2 -mt-1 flex flex-wrap items-center gap-1.5">
+                {getInstallationStatusBadge(item.installationStatus, item.installationRequired)}
+                {getActionStatusBadge(item.actionStatus)}
+                {showInlineActions && isExchangeEligibleItem(item) && !hasAction && (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
+                    Exchange eligible
+                  </span>
+                )}
+              </div>
+            )}
 
-                  {/* Inline action CTAs - lightweight pill style */}
-                  {showInlineActions && (hasPostDeliveryJourney(item) || (canInitiateAction(item) && onActionClick)) && (
-                    <div className="mt-2.5 flex items-center gap-2">
-                      {/* View Journey - ghost pill style */}
-                      {hasPostDeliveryJourney(item) && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setJourneyItem(item);
-                          }}
-                          className="flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium text-muted-foreground bg-muted/60 hover:bg-muted transition-colors"
-                        >
-                          <span>View Journey</span>
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
-                      )}
+            {/* Zone 3: Action Zone - Full width below image row */}
+            {showCTAs && (
+              <div className="px-3 pb-3 flex items-center gap-2">
+                {/* View Journey - ghost chip */}
+                {hasPostDeliveryJourney(item) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setJourneyItem(item);
+                    }}
+                    className="flex items-center gap-1 py-1 px-2.5 rounded-full text-[11px] font-medium text-muted-foreground bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <span>View Journey</span>
+                    <ChevronRight className="h-3 w-3" />
+                  </button>
+                )}
 
-                      {/* Replace/Return - subtle outline pill */}
-                      {canInitiateAction(item) && onActionClick && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onActionClick(item);
-                          }}
-                          className="flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium border border-border text-foreground hover:border-primary/50 hover:text-primary transition-colors"
-                        >
-                          <RotateCcw className="h-3.5 w-3.5" />
-                          <span>Replace / Return</span>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        </motion.div>
-      ))}
+                {/* Replace/Return - subtle outline chip */}
+                {canInitiateAction(item) && onActionClick && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onActionClick(item);
+                    }}
+                    className="flex items-center gap-1 py-1 px-2.5 rounded-full text-[11px] font-medium border border-border/80 text-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    <span>Replace / Return</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </motion.div>
+        );
+      })}
 
       {/* Post-Delivery Journey Sheet */}
       {journeyItem && (
