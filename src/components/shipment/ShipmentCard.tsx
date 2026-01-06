@@ -47,18 +47,6 @@ export const ShipmentCard = ({
     setIsActionModalOpen(true);
   };
 
-  const handleReturnClick = (item: OrderItem) => {
-    openActionModal(item);
-  };
-
-  const handleReplaceClick = (item: OrderItem) => {
-    openActionModal(item);
-  };
-
-  const handleExchangeClick = (item: OrderItem) => {
-    openActionModal(item);
-  };
-
   const handleActionSubmit = (item: OrderItem, action: string, reason: ReturnReason, notes: string) => {
     // In a real app, this would call an API
     console.log("Action submitted:", { item: item.id, action, reason, notes });
@@ -113,9 +101,7 @@ export const ShipmentCard = ({
               orderId={shipment.orderId} 
               shipmentId={shipment.id}
               showInlineActions={isDelivered}
-              onReturnClick={isDelivered ? handleReturnClick : undefined}
-              onReplaceClick={isDelivered ? handleReplaceClick : undefined}
-              onExchangeClick={isDelivered && isMetroCity ? handleExchangeClick : undefined}
+              onActionClick={isDelivered ? openActionModal : undefined}
             />
           </motion.div> : (/* Product thumbnails - 72px uniform tiles */
       <div className="flex items-center justify-between mb-4">
