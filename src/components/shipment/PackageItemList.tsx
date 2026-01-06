@@ -9,6 +9,9 @@ interface PackageItemListProps {
   orderId?: string;
   shipmentId?: string;
   onItemClick?: (itemId: string) => void;
+  showInlineActions?: boolean;
+  onReturnClick?: (item: OrderItem) => void;
+  onExchangeClick?: (item: OrderItem) => void;
 }
 
 // Helper to determine exchange eligibility per item
@@ -74,7 +77,10 @@ export const PackageItemList = ({
   compact = false, 
   orderId, 
   shipmentId,
-  onItemClick 
+  onItemClick,
+  showInlineActions = false,
+  onReturnClick,
+  onExchangeClick
 }: PackageItemListProps) => {
   const navigate = useNavigate();
   const formatPrice = (price: number) => {
@@ -199,6 +205,34 @@ export const PackageItemList = ({
                   <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
                     Exchange eligible
                   </span>
+                )}
+              </div>
+            )}
+
+            {/* Inline action CTAs */}
+            {showInlineActions && !item.actionStatus && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {isExchangeEligibleItem(item) && onExchangeClick && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExchangeClick(item);
+                    }}
+                    className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                  >
+                    Exchange
+                  </button>
+                )}
+                {onReturnClick && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onReturnClick(item);
+                    }}
+                    className="px-3 py-1.5 text-xs font-medium border border-border rounded-full bg-background hover:bg-secondary transition-colors"
+                  >
+                    Return
+                  </button>
                 )}
               </div>
             )}
