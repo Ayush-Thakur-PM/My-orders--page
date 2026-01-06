@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Package, ChevronDown, ChevronUp } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Shipment, isExchangeEligible, OrderItem } from "@/types/order";
+import { Shipment, isExchangeEligible, OrderItem, ReturnReason } from "@/types/order";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ActionStatusBadge } from "@/components/ui/action-status-badge";
 import { PackageItemList } from "./PackageItemList";
+import { ItemActionModal } from "@/components/tracking/ItemActionModal";
 import { cn } from "@/lib/utils";
 
 interface ShipmentCardProps {
@@ -22,8 +23,10 @@ export const ShipmentCard = ({
   totalPackages = 1,
   showItemDetails = false
 }: ShipmentCardProps) => {
-  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(showItemDetails);
+  const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  
   const isActive = shipment.status !== "delivered" && shipment.status !== "cancelled";
   const itemCount = shipment.items.length;
   const displayItems = shipment.items.slice(0, 3);
@@ -39,16 +42,26 @@ export const ShipmentCard = ({
     setIsExpanded(!isExpanded);
   };
 
+  const openActionModal = (item: OrderItem) => {
+    setSelectedItem(item);
+    setIsActionModalOpen(true);
+  };
+
   const handleReturnClick = (item: OrderItem) => {
-    navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=return`);
+    openActionModal(item);
   };
 
   const handleReplaceClick = (item: OrderItem) => {
-    navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=replacement`);
+    openActionModal(item);
   };
 
   const handleExchangeClick = (item: OrderItem) => {
-    navigate(`/track/${shipment.orderId}/${shipment.id}?item=${item.id}&action=exchange`);
+    openActionModal(item);
+  };
+
+  const handleActionSubmit = (item: OrderItem, action: string, reason: ReturnReason, notes: string) => {
+    // In a real app, this would call an API
+    console.log("Action submitted:", { item: item.id, action, reason, notes });
   };
   return <motion.div initial={{
     opacity: 0,
@@ -164,5 +177,16 @@ export const ShipmentCard = ({
             <span>Simultaneous pickup & delivery</span>
           </div>}
       </div>
+
+      {/* Item Action Modal - opens in place without navigation */}
+      {selectedItem && (
+        <ItemActionModal
+          open={isActionModalOpen}
+          onOpenChange={setIsActionModalOpen}
+          item={selectedItem}
+          shippingCity={shipment.shippingAddress.city}
+          onSubmit={handleActionSubmit}
+        />
+      )}
     </motion.div>;
 };
