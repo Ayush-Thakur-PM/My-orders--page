@@ -43,12 +43,11 @@ export const Header = ({
       <div className="border-b border-border/20">
         <div className="container flex h-14 items-center justify-between md:h-16 max-w-2xl mx-auto px-4">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">SC</span>
-            </div>
-            <span className="text-base font-semibold text-foreground sm:text-lg">
-              The Sleep Company
-            </span>
+            <img 
+              src="https://thesleepcompany.in/cdn/shop/files/new_logo.webp?v=1706780127&width=600" 
+              alt="The Sleep Company Logo"
+              className="h-8 w-auto object-contain"
+            />
           </Link>
 
           <button
