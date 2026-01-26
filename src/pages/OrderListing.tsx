@@ -52,7 +52,7 @@ const OrderListing = () => {
 
   return (
     <div className="min-h-screen bg-background pb-28">
-      <Header title="My Orders" showBack />
+      <Header title="My Orders" />
 
       <main className="container px-4 py-6 lg:py-8 max-w-2xl mx-auto">
         {/* User greeting */}
