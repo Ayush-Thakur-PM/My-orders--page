@@ -44,7 +44,7 @@ export const Header = ({
         <div className="container flex h-14 items-center justify-between md:h-16 max-w-2xl mx-auto px-4">
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="https://thesleepcompany.in/cdn/shop/files/new_logo.webp?v=1706780127&width=600" 
+              src="/images/tsc-logo.webp" 
               alt="The Sleep Company Logo"
               className="h-8 w-auto object-contain"
             />
