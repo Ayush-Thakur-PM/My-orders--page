@@ -103,6 +103,85 @@ export const mockShipments: Shipment[] = [
   },
 
   // ============================================
+  // SHIPMENT 1B: Second shipment for order 20551926
+  // Ships separately from SHP001
+  // ============================================
+  {
+    id: "SHP001B",
+    orderId: "20551926",
+    status: "delivered",
+    currentStep: 4,
+    expectedDelivery: "Dec 9, 2024",
+    deliveredDate: "Dec 8, 2024",
+    trackingNumber: "BLUEDART1112223",
+    carrier: "Blue Dart",
+    actionStatus: "none",
+    items: [
+      {
+        id: "TSCTOPPER01",
+        sku: "TSCTOPPER01",
+        name: "SmartGRID Mattress Topper",
+        variant: "King Size / 2 inch",
+        configuration: "Medium Soft",
+        image: "https://cdn.shopify.com/s/files/1/0635/6929/7637/files/Baby-Mattress_01.webp?v=1754644949",
+        quantity: 1,
+        price: 9999,
+        installationRequired: false,
+        installationStatus: "not_required",
+        actionStatus: "none",
+      },
+    ],
+    shippingAddress: {
+      name: "Rahul Sharma",
+      line1: "B-42, Sector 15",
+      line2: "Near City Mall",
+      city: "Noida",
+      state: "Uttar Pradesh",
+      pincode: "201301",
+      phone: "+91 98278 74262",
+    },
+    milestones: [
+      {
+        status: "placed",
+        label: "Order Placed",
+        timestamp: "Dec 5, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "packed",
+        label: "Packed",
+        timestamp: "Dec 6, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "shipped",
+        label: "Shipped",
+        timestamp: "Dec 6, 2024",
+        description: "Package picked up by Blue Dart",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "out_for_delivery",
+        label: "Out for Delivery",
+        timestamp: "Dec 8, 2024",
+        isComplete: true,
+        isCurrent: false,
+      },
+      {
+        status: "delivered",
+        label: "Delivered",
+        timestamp: "Dec 8, 2024",
+        description: "Delivered - Signed by Rahul",
+        isComplete: true,
+        isCurrent: true,
+      },
+    ],
+  },
+
+  // ============================================
   // SHIPMENT 2: In Transit with furniture item
   // 1 item requiring installation
   // ============================================
@@ -858,7 +937,7 @@ export const mockOrders: Order[] = [
     id: "20551926",
     orderNumber: "#20551926",
     orderDate: "Dec 5, 2024",
-    shipments: [mockShipments[0]],
+    shipments: [mockShipments[0], mockShipments[1]],
     billingAddress: {
       name: "Rahul Sharma",
       line1: "B-42, Sector 15",
@@ -880,7 +959,7 @@ export const mockOrders: Order[] = [
     id: "20553743",
     orderNumber: "#20553743",
     orderDate: "Dec 4, 2024",
-    shipments: [mockShipments[1]],
+    shipments: [mockShipments[2]],
     billingAddress: {
       name: "Rahul Sharma",
       line1: "B-42, Sector 15",
@@ -901,7 +980,7 @@ export const mockOrders: Order[] = [
     id: "20546974",
     orderNumber: "#20546974",
     orderDate: "Nov 20, 2024",
-    shipments: [mockShipments[2]],
+    shipments: [mockShipments[3]],
     billingAddress: {
       name: "Rahul Sharma",
       line1: "B-42, Sector 15",
@@ -922,7 +1001,7 @@ export const mockOrders: Order[] = [
     id: "20543687",
     orderNumber: "#20543687",
     orderDate: "Nov 8, 2024",
-    shipments: [mockShipments[3]],
+    shipments: [mockShipments[4]],
     billingAddress: {
       name: "Rahul Sharma",
       line1: "B-42, Sector 15",
@@ -943,7 +1022,7 @@ export const mockOrders: Order[] = [
     id: "20551930",
     orderNumber: "#20551930",
     orderDate: "Dec 1, 2024",
-    shipments: [mockShipments[4]],
+    shipments: [mockShipments[5]],
     billingAddress: {
       name: "Priya Singh",
       line1: "A-101, HSR Layout",
@@ -965,7 +1044,7 @@ export const mockOrders: Order[] = [
     id: "20551935",
     orderNumber: "#20551935",
     orderDate: "Dec 5, 2024",
-    shipments: [mockShipments[5]],
+    shipments: [mockShipments[6]],
     billingAddress: {
       name: "Amit Patel",
       line1: "405, Sea View Apartments",
@@ -987,7 +1066,7 @@ export const mockOrders: Order[] = [
     id: "20551940",
     orderNumber: "#20551940",
     orderDate: "Dec 6, 2024",
-    shipments: [mockShipments[6]],
+    shipments: [mockShipments[7]],
     billingAddress: {
       name: "Sneha Kapoor",
       line1: "12, Anna Nagar",
@@ -1009,7 +1088,7 @@ export const mockOrders: Order[] = [
     id: "20551945",
     orderNumber: "#20551945",
     orderDate: "Dec 8, 2024",
-    shipments: [mockShipments[7]],
+    shipments: [mockShipments[8]],
     billingAddress: {
       name: "Rajesh Kumar",
       line1: "45, Malviya Nagar",
