@@ -2,52 +2,60 @@ import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { ShipmentCard } from "@/components/shipment/ShipmentCard";
 import { StickyBottomCTA } from "@/components/ui/sticky-bottom-cta";
-import { mockShipments } from "@/data/mockOrders";
-import { Shipment } from "@/types/order";
-import { Package, Clock } from "lucide-react";
+import { mockOrders } from "@/data/mockOrders";
+import { Order } from "@/types/order";
+import { Package, Clock, CalendarDays } from "lucide-react";
 
 const OrderListing = () => {
-  // Group shipments by status
-  const activeShipments = mockShipments.filter(
-    (s) => s.status !== "delivered" && s.status !== "cancelled"
+  // Separate active and past orders
+  const activeOrders = mockOrders.filter((order) =>
+    order.shipments.some(
+      (s) => s.status !== "delivered" && s.status !== "cancelled"
+    )
   );
-  const completedShipments = mockShipments.filter(
-    (s) => s.status === "delivered" || s.status === "cancelled"
+  const pastOrders = mockOrders.filter((order) =>
+    order.shipments.every(
+      (s) => s.status === "delivered" || s.status === "cancelled"
+    )
   );
 
-  const ShipmentSection = ({
-    title,
-    icon: Icon,
-    shipments,
-    startIndex = 0,
+  const OrderGroupCard = ({
+    order,
+    animationIndex,
   }: {
-    title: string;
-    icon: typeof Package;
-    shipments: Shipment[];
-    startIndex?: number;
+    order: Order;
+    animationIndex: number;
   }) => (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-6"
+      transition={{ delay: animationIndex * 0.08, duration: 0.4 }}
+      className="rounded-2xl border border-dashed border-border bg-muted/30 p-3 lg:p-4"
     >
-      <div className="mb-4 flex items-center gap-2">
-        <Icon className="h-5 w-5 text-muted-foreground" />
-        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
-          {shipments.length}
+      {/* Order header row */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <CalendarDays className="h-3.5 w-3.5" />
+          <span>{order.orderDate}</span>
+        </div>
+        <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground border border-border/60">
+          Order ID: <span className="font-semibold text-foreground">{order.orderNumber}</span>
         </span>
       </div>
-      <div className="space-y-4">
-        {shipments.map((shipment, index) => (
+
+      {/* Shipments within this order */}
+      <div className="space-y-3">
+        {order.shipments.map((shipment, idx) => (
           <ShipmentCard
             key={shipment.id}
             shipment={shipment}
-            index={startIndex + index}
+            index={0}
+            packageNumber={idx + 1}
+            totalPackages={order.shipments.length}
           />
         ))}
       </div>
-    </motion.section>
+    </motion.div>
   );
 
   return (
@@ -69,27 +77,52 @@ const OrderListing = () => {
           </p>
         </motion.div>
 
-        {/* Active Shipments */}
-        {activeShipments.length > 0 && (
-          <ShipmentSection
-            title="Active Shipments"
-            icon={Package}
-            shipments={activeShipments}
-          />
+        {/* Active Orders */}
+        {activeOrders.length > 0 && (
+          <section className="mb-8">
+            <div className="mb-4 flex items-center gap-2">
+              <Package className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold text-foreground">Active Orders</h2>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                {activeOrders.length}
+              </span>
+            </div>
+            <div className="space-y-5">
+              {activeOrders.map((order, index) => (
+                <OrderGroupCard
+                  key={order.id}
+                  order={order}
+                  animationIndex={index}
+                />
+              ))}
+            </div>
+          </section>
         )}
 
-        {/* Completed Shipments */}
-        {completedShipments.length > 0 && (
-          <ShipmentSection
-            title="Past Orders"
-            icon={Clock}
-            shipments={completedShipments}
-            startIndex={activeShipments.length}
-          />
+        {/* Past Orders */}
+        {pastOrders.length > 0 && (
+          <section className="mb-6">
+            <div className="mb-4 flex items-center gap-2">
+              <Clock className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold text-foreground">Past Orders</h2>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                {pastOrders.length}
+              </span>
+            </div>
+            <div className="space-y-5">
+              {pastOrders.map((order, index) => (
+                <OrderGroupCard
+                  key={order.id}
+                  order={order}
+                  animationIndex={activeOrders.length + index}
+                />
+              ))}
+            </div>
+          </section>
         )}
 
         {/* Empty state */}
-        {mockShipments.length === 0 && (
+        {mockOrders.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
